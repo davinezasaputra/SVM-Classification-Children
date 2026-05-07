@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Puskesmas Simpang Teritip</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0d9488">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 3px solid #0d9488; color: #0d9488; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-teal-900 text-white hidden md:flex flex-col">
+            <div class="p-6">
+                <img src="{{ url_for('static', filename='assets/img/Kabupaten-Bangka-Barat.png') }}" alt="Logo Puskesmas" class="w-12 h-12 mb-4">
+                <h1 class="text-xl font-black tracking-tighter uppercase">Puskesmas Simpang Teritip</h1>
+                <p class="text-xs text-teal-300">Sistem Informasi Gizi SVM</p>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <a href="#" onclick="switchTab('dashboard')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Dashboard Utama</a>
+                <a href="#" onclick="switchTab('pencarian')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Pencarian Data</a>
+                <a href="/input" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Input Data Baru</a>
+                <a href="#" onclick="switchTab('informasi')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Info & Edukasi</a>
+            </nav>
+            <div class="p-4 border-t border-teal-800">
+                <a href="/logout" class="text-sm text-teal-400 hover:text-white">Keluar Sistem</a>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
+                <h2 id="tab-title" class="text-lg font-bold text-slate-800">Ringkasan Statistik Gizi</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-slate-500">Halo, Petugas Teritip</span>
+                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xs">PT</div>
+                </div>
+            </header>
+
+            <div class="p-8">
+                <section id="tab-dashboard" class="space-y-8">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1">Total Balita</p>
+                            <h3 id="stat-total" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-teal-600 font-medium mt-2">↑ Data terdaftar</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1 text-red-500">Gizi Buruk</p>
+                            <h3 id="stat-buruk" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-slate-400 mt-2">Status per hari ini</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1 text-orange-500">Stunting / Pendek</p>
+                            <h3 id="stat-stunting" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-slate-400 mt-2">Perlu intervensi khusus</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1 text-teal-500">Gizi Baik</p>
+                            <h3 id="stat-baik" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-teal-600 font-medium mt-2">Kondisi Normal</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                            <h4 class="font-bold text-slate-800 mb-4 text-center">Distribusi Gizi SVM</h4>
+                            <div class="relative h-64 w-full">
+                                <canvas id="chartGizi"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                            <h4 class="font-bold text-slate-800 mb-4 text-center">Sebaran per Desa</h4>
+                            <div class="relative h-64 w-full">
+                                <canvas id="chartDesa"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-center">
+                            <h4 class="font-bold text-slate-800 mb-4">Aksi Cepat Petugas</h4>
+                            <div class="space-y-4">
+                                <a href="/input" class="flex items-center justify-between p-4 bg-teal-50 rounded-xl border border-teal-100 hover:bg-teal-100 transition">
+                                    <span class="text-teal-900 font-semibold text-sm">Input Pengukuran Baru</span>
+                                    <span class="text-teal-600 font-bold">→</span>
+                                </a>
+                                <button onclick="switchTab('pencarian')" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition text-left">
+                                    <span class="text-slate-700 font-semibold text-sm">Cari Riwayat Medis Anak</span>
+                                    <span class="text-slate-400 font-bold">→</span>
+                                </button>
+                                <a href="/data-anak" class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition text-left">
+                                    <span class="text-slate-700 font-semibold text-sm">Lihat Seluruh Tabel Data</span>
+                                    <span class="text-slate-400 font-bold">→</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold mb-4 text-slate-800">Peta Sebaran Lokasi Balita</h4>
+                        <div id="map" class="h-96 rounded-xl border-2 border-slate-200 z-0 relative"></div>
+                    </div>
+                </section>
+
+                <section id="tab-pencarian" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="relative max-w-2xl mx-auto mb-8">
+                            <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Masukkan 16 Digit NIK Ibu atau Nama Anak..." 
+                                class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-100 focus:border-teal-500 focus:ring-4 focus:ring-teal-50 outline-none transition text-lg">
+                            <svg class="w-6 h-6 absolute left-4 top-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-6 py-4">NIK Ibu</th>
+                                        <th class="px-6 py-4">Nama Anak</th>
+                                        <th class="px-6 py-4">Nama Ibu</th>
+                                        <th class="px-6 py-4">Status Gizi Terakhir</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" class="divide-y divide-slate-100">
+                                    <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Gunakan kotak di atas untuk mencari data.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-informasi" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">01</div>
+                        <h4 class="font-bold text-slate-800 mb-2">Pentingnya ASI Eksklusif</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">ASI adalah nutrisi terbaik untuk bayi usia 0-6 bulan untuk membangun daya tahan tubuh yang kuat.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">02</div>
+                        <h4 class="font-bold text-slate-800 mb-2">Jadwal Vitamin A</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Pastikan balita mendapatkan kapsul vitamin A setiap bulan Februari dan Agustus di Posyandu.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">03</div>
+                        <h4 class="font-bold text-slate-800 mb-2">MPASI Bergizi</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Setelah 6 bulan, bayi memerlukan makanan pendamping yang kaya zat besi dan protein hewani.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let map; // Variabel global untuk peta
+
+        // Logika Navigasi Tab
+        function switchTab(tabId) {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-pencarian').classList.add('hidden');
+            document.getElementById('tab-informasi').classList.add('hidden');
+
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            const titles = {
+                'dashboard': 'Ringkasan Statistik Gizi',
+                'pencarian': 'Pencarian Data Balita',
+                'informasi': 'Informasi Edukasi Gizi'
+            };
+            document.getElementById('tab-title').innerText = titles[tabId];
+
+            // Trik untuk mencegah map Leaflet menjadi abu-abu saat ganti tab
+            if (tabId === 'dashboard' && map) {
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+            }
+        }
+
+        // Jalankan tab dashboard pada awal halaman dimuat
+        switchTab('dashboard');
+
+        let searchTimeout = null;
+
+        async function fetchSearchData() {
+            const input = document.getElementById('searchInput').value;
+            const tableBody = document.getElementById('tableBody');
+            
+            if (input.trim() === '') {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Gunakan kotak di atas untuk mencari data.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-teal-500 animate-pulse font-bold">Mencari data di database...</td></tr>';
+
+            try {
+                const response = await fetch(`/api/v1/search?q=${encodeURIComponent(input)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    tableBody.innerHTML = ''; 
+                    
+                    if (result.data.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-red-400 font-medium">Data balita tidak ditemukan.</td></tr>';
+                        return;
+                    }
+
+                    result.data.forEach(item => {
+                        let badgeColor = "bg-slate-100 text-slate-700";
+                        const statusL = item.status_terakhir.toLowerCase();
+                        
+                        if (statusL.includes('kurang') || statusL.includes('buruk') || statusL.includes('pendek')) {
+                            badgeColor = "bg-red-100 text-red-700";
+                        } else if (statusL.includes('lebih') || statusL.includes('obesitas')) {
+                            badgeColor = "bg-orange-100 text-orange-700";
+                        } else if (statusL.includes('baik') || statusL.includes('normal')) {
+                            badgeColor = "bg-teal-100 text-teal-700";
+                        }
+
+                        const row = `
+                            <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                                <td class="px-6 py-4 font-mono text-sm">${item.nik_ibu}</td>
+                                <td class="px-6 py-4 font-bold text-slate-800">${item.nama_anak}</td>
+                                <td class="px-6 py-4 text-slate-600">${item.nama_ibu}</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 ${badgeColor} rounded-full text-xs font-bold">${item.status_terakhir}</span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="/data-anak" class="text-white font-bold text-xs bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg transition shadow-sm">Buka Data</a>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                }
+            } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-red-500 font-bold">Terjadi kesalahan koneksi ke server.</td></tr>';
+            }
+        }
+
+        function filterData() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(fetchSearchData, 500);
+        }
+
+        function initMap(data) {
+            if (map) map.remove(); 
+            // Koordinat disesuaikan ke area Bangka Barat / Simpang Teritip
+            map = L.map('map').setView([-1.815, 105.445], 11); 
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            if(data && data.length > 0) {
+                data.forEach(p => {
+                    const color = p.status.includes('Buruk') ? 'red' : 'green';
+                    L.circleMarker([p.lat, p.lng], { color: color, radius: 8 }).addTo(map)
+                        .bindPopup(`<b>${p.nama}</b><br>Status: ${p.status}`);
+                });
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const res = await fetch('/api/v1/stats');
+                const d = await res.json();
+
+                if (d.status === 'success') {
+                    document.getElementById('stat-total').innerText = d.summary.total;
+                    document.getElementById('stat-buruk').innerText = d.summary.buruk;
+                    document.getElementById('stat-stunting').innerText = d.summary.stunting;
+                    document.getElementById('stat-baik').innerText = d.summary.baik;
+                }
+
+                new Chart(document.getElementById('chartGizi'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(d.gizi),
+                        datasets: [{ data: Object.values(d.gizi), backgroundColor: ['#0d9488', '#f59e0b', '#ef4444', '#3b82f6'] }]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+
+                // Render Bar Chart Desa
+                new Chart(document.getElementById('chartDesa'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(d.desa),
+                        datasets: [{ label: 'Jumlah Anak', data: Object.values(d.desa), backgroundColor: '#0d9488', borderRadius: 4 }]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+
+                initMap(d.map);
+
+
+            } catch(e) {
+                console.error("Gagal memuat statistik", e);
+                // kosongin map jika gaada data nya
+                initMap([]); 
+            }
+        }
+
+        window.onload = loadDashboardData;
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                  .then(registration => console.log('PWA SW didaftarkan'))
+                  .catch(err => console.log('PWA SW gagal', err));
+            });
+        }
+    </script>
+</body>
+</html>

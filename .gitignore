@@ -1,16 +1,24 @@
+# Lingkungan virtual Python
 .venv/
-node_modules
-__pycache__
-*.pyc
-*.pyo
-*.pyd
+env/
+venv/
+
+# File cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & Editor (Pengaturan lokal)
+.vscode/
+
+# KONFIGURASI SANGAT RAHASIA (WAJIB DIABAIKAN!)
+.env
+
+# Database (Mengabaikan data lokal)
+*.sqlite3
 *.db
-*.sqlite
-*.log
-.DS_Store
-*.csvgi
+instance/
+
+# Abaikan file data pasien/laporan Excel agar tidak bocor ke publik
 *.xlsx
-*.zip
-*.tar.gz
-*.bak
-*.tmp
+*.csv

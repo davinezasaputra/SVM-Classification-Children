@@ -1,0 +1,21 @@
+{
+  "name": "SIM Gizi Puskesmas teritip",
+  "short_name": "Gizi Pusk",
+  "description": "Sistem Informasi Manajemen dan Klasifikasi Gizi Balita (Offline-First)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0d9488",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

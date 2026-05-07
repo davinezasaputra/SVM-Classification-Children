@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Data Anak</title>
+</head>
+<body class="bg-slate-50 font-sans">
+    
+    <nav class="bg-teal-600 p-4 text-white flex justify-between shadow-md">
+        <div class="space-x-6">
+            <span class="font-bold uppercase tracking-widest">SVM Simpang Teritip</span>
+            <a href="/" class="text-teal-100 hover:text-white">Form Klasifikasi</a>
+            <a href="/data-anak" class="text-white font-bold border-b-2">Data Anak</a>
+        </div>
+        <span>Halo, {{ user.nama }} | <a href="{{ for_url }}" class="underline hover:text-teal-200">Keluar</a></span>
+    </nav>
+
+   <main class="max-w-6xl mx-auto p-8">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+            
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 class="text-2xl font-bold text-teal-800">Manajemen Data Anak</h2>
+                
+                <div class="flex items-center gap-4">
+                    <input type="file" id="fileExcel" accept=".xlsx, .xls" class="hidden" onchange="prosesImportExcel()">
+                    
+
+                    <button onclick="downloadExcel()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">
+                        Download Excel
+                    </button>
+                    
+                    <a href="/" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">
+                        + Tambah Pengukuran Baru
+                    </a>
+                </div>
+            </div> 
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-teal-50 text-teal-800 border-b-2 border-teal-200">
+                            <th class="p-4 font-semibold">NIK Ibu / Nama Ibu</th>
+                            <th class="p-4 font-semibold">Nama Anak</th>
+                            <th class="p-4 font-semibold">L/P</th>
+                            <th class="p-4 font-semibold">Status Gizi (SVM Terakhir)</th>
+                            <th class="p-4 font-semibold text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel-anak" class="text-gray-700 divide-y">
+                        <tr><td colspan="5" class="text-center p-6 text-gray-400 font-bold animate-pulse">Memuat data dari server...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        // Fungsi untuk mengambil data anak dari API
+        async function muatDataAnak() {
+            try {
+                const res = await fetch('/api/v1/anak');
+                const result = await res.json();
+                
+                const tbody = document.getElementById('tabel-anak');
+                tbody.innerHTML = ''; // Kosongkan tabel loading
+
+                if (result.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-6 text-gray-500">Belum ada data anak di sistem.</td></tr>';
+                    return;
+                }
+
+                result.data.forEach(anak => {
+                    // Beri warna khusus jika gizi buruk/kurang
+                    let warnaStatus = "text-gray-700 font-bold";
+                    if(anak.status_terakhir.includes('Kurang') || anak.status_terakhir.includes('Buruk')) {
+                        warnaStatus = "text-red-600 font-bold bg-red-50 px-2 py-1 rounded";
+                    } else if(anak.status_terakhir.includes('Normal') || anak.status_terakhir.includes('Baik')) {
+                        warnaStatus = "text-teal-600 font-bold bg-teal-50 px-2 py-1 rounded";
+                    }
+
+                    const baris = `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4"><span class="block font-mono text-xs text-gray-500">${anak.nik_ibu}</span>${anak.nama_ibu}</td>
+                            <td class="p-4 font-bold">${anak.nama_anak}</td>
+                            <td class="p-4">${anak.jk}</td>
+                            <td class="p-4"><span class="${warnaStatus}">${anak.status_terakhir}</span></td>
+                            <td class="p-4 flex gap-2 justify-center">
+                                <a href="/kia/${anak.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow">Buku KIA</a>
+                                <button onclick="hapusAnak(${anak.id}, '${anak.nama_anak}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += baris;
+                });
+            } catch (err) {
+                alert("Gagal memuat data.");
+            }
+        }
+
+        async function downloadExcel() {
+            try {
+                // Ubah status tombol sementara agar tidak diklik berkali-kali
+                const tbody = document.getElementById('tabel-anak');
+                const isiTabelAsli = tbody.innerHTML;
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-6 text-blue-600 font-bold animate-pulse">Sedang menyiapkan file Excel...</td></tr>';
+
+                const response = await fetch('/api/v1/export-excel', {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal mengunduh data dari server');
+                }
+
+                // Cek apakah ada peringatan toleransi usia > 60 bulan
+                const alertHeader = response.headers.get('X-Alert-Usia-Toleransi');
+                if (alertHeader === 'true') {
+                    alert('PERHATIAN: Terdapat data anak dengan usia melebihi 60 bulan (masih dalam batas toleransi 70 bulan) di dalam file export ini.');
+                }
+
+                // Ubah response menjadi blob (file)
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                // Trigger proses unduh di browser
+                a.href = downloadUrl;
+                a.download = `Data_Gizi_Balita_${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Bersihkan DOM
+                window.URL.revokeObjectURL(downloadUrl);
+                a.remove();
+                
+                // Kembalikan isi tabel
+                tbody.innerHTML = isiTabelAsli;
+
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan saat mencoba mengunduh file Excel.');
+                muatDataAnak(); // Muat ulang tabel jika error
+            }
+        }
+
+
+        async function hapusAnak(id, nama) {
+            if(confirm(`Yakin ingin menghapus semua data dan Buku KIA milik anak bernama ${nama}? Data tidak bisa dikembalikan.`)) {
+                const res = await fetch(`/api/v1/anak/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    alert('Data berhasil dihapus.');
+                    muatDataAnak(); // Refresh tabel
+                } else {
+                    alert('Gagal menghapus data.');
+                }
+            }
+        }
+
+        // Jalankan saat halaman dibuka
+        window.onload = muatDataAnak;
+    </script>
+</body>
+</html>

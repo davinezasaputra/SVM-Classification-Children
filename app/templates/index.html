@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Klasifikasi Gizi Balita SVM</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0d9488">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-slate-50 font-sans">
+
+    <nav class="bg-puskesmas p-4 text-white flex justify-between items-center shadow-md">
+        <div class="space-x-6 flex items-center">
+            <span class="font-bold uppercase tracking-widest text-lg mr-4">SVM</span>
+            <a href="/" class="text-white font-bold border-b-2 border-white pb-1">Form Klasifikasi</a>
+            <a href="/data-anak" class="text-teal-100 hover:text-white transition pb-1">Data Anak</a>
+        </div>
+        <div id="panel-sinkronisasi" class="hidden bg-orange-100 border-l-4 border-orange-500 p-4 mb-6 rounded-r-lg shadow-sm">
+        </div>
+        <div class="text-sm">
+            <span>Halo, Petugas | <a href="/logout" class="underline hover:text-teal-200">Keluar</a></span>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
+        <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl">
+            <div class="flex items-center justify-between col-span-1 lg:col-span-3">
+            <div>
+                <p class="font-bold text-orange-800">Terdapat Data Offline!</p>
+                <p class="text-sm text-orange-700">Ada <span id="angka-antrian" class="font-black">0</span> data anak yang belum masuk ke server.</p>
+            </div>
+            <button onclick="prosesSinkronisasi()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded shadow transition">
+                Sinkronisasi Sekarang
+            </button>
+        </div>
+        </div>
+        
+        
+        <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-xl font-bold mb-6 text-teal-800 border-b pb-2">Form Data Anak & Pengukuran</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="col-span-1 sm:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">NIK Ibu</label>
+                    <input type="text" id="nik_ibu" oninput="handleCekNIK(this.value)" name="nik_ibu" class="w-full border p-3 rounded-lg bg-gray-50 focus:ring-2 focus:ring-puskesmas outline-none" placeholder="Masukkan 16 Digit NIK">
+                </div>
+                <div id="form-lokasi" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+                    <p class="text-sm text-blue-600 mb-2 font-semibold italic">* Data Ibu baru terdeteksi. Silakan lengkapi lokasi domisili.</p>
+                    <input type="text" name="desa" placeholder="Nama Desa" class="border p-2 w-full mb-2">
+                    <input type="text" name="latitude" placeholder="Latitude" class="border p-2 w-full mb-2">
+                    <input type="text" name="longitude" placeholder="Longitude" class="border p-2 w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Nama Ibu</label>
+                    <input type="text" id="nama_ibu" class="w-full border p-3 rounded-lg bg-gray-50 focus:ring-2 focus:ring-puskesmas outline-none" placeholder="Nama lengkap ibu">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Nama Anak</label>
+                    <input type="text" id="nama_anak" class="w-full border p-3 rounded-lg bg-gray-50 focus:ring-2 focus:ring-puskesmas outline-none" placeholder="Nama lengkap anak">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Jenis Kelamin</label>
+                    <select id="jk" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-puskesmas outline-none">
+                        <option value="L">Laki-Laki</option>
+                        <option value="P">Perempuan</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Tanggal Lahir</label>
+                    <input type="date" id="tanggal_lahir" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-puskesmas outline-none">
+                    <p id="info_umur" class="text-xs text-puskesmas font-semibold mt-1 hidden"></p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Berat Badan (kg)</label>
+                    <input type="number" step="0.01" id="berat_badan" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-puskesmas outline-none" placeholder="Contoh: 12.5">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Tinggi / Panjang Badan (cm)</label>
+                    <input type="number" step="0.01" id="tinggi_badan" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-puskesmas outline-none" placeholder="Contoh: 90.5">
+                </div>
+                
+                <div class="col-span-1 sm:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Posisi Pengukuran</label>
+                    <div class="flex gap-6 bg-gray-50 p-3 rounded-lg border" id="container_posisi">
+                        <label id="label_berdiri" class="flex items-center gap-2 cursor-pointer transition">
+                            <input type="radio" name="posisi" id="posisi_berdiri" value="berdiri" checked class="w-4 h-4 text-puskesmas"> Berdiri
+                        </label>
+                        <label id="label_telentang" class="flex items-center gap-2 cursor-pointer transition">
+                            <input type="radio" name="posisi" id="posisi_telentang" value="telentang" class="w-4 h-4 text-puskesmas"> Telentang
+                        </label>
+                    </div>
+                    <p id="info_posisi" class="text-xs text-red-500 font-medium mt-1 hidden">Balita < 24 bulan wajib diukur secara telentang.</p>
+                </div>
+            </div>
+            
+            <button onclick="submitKlasifikasi()" class="mt-8 w-full bg-puskesmas text-white font-bold py-4 rounded-xl hover:bg-puskesmas-dark transition shadow-lg text-lg tracking-wide">
+                SIMPAN & KLASIFIKASI SVM
+            </button>
+        </div>
+
+        <div class="lg:col-span-1 bg-white p-8 rounded-2xl shadow-xl flex flex-col h-full border border-gray-100">
+            <h3 class="text-gray-500 uppercase text-xs font-bold tracking-tighter mb-4 border-b pb-2">Kesimpulan & Indikator</h3>
+            
+            <div id="status-awal" class="flex-1 flex items-center justify-center text-gray-400 font-medium">
+                Belum ada data diproses.
+            </div>
+
+            <div id="loading" class="hidden flex-1 flex flex-col items-center justify-center text-puskesmas font-bold animate-pulse">
+                <svg class="w-10 h-10 mb-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Memproses Model SVM...
+            </div>
+            
+            <div id="hasil-container" class="hidden flex-1 flex flex-col justify-between">
+                <div class="bg-teal-50 border-2 border-teal-200 rounded-xl p-6 text-center mb-6 shadow-inner">
+                    <p class="text-sm text-gray-600 font-semibold mb-1">Status Gizi (BB/TB)</p>
+                    <h1 id="hasil-svm" class="text-3xl font-black text-teal-700 uppercase tracking-tight">Normal</h1>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-700">Indikator BB/U</span>
+                            <span id="z-bbu" class="bg-white px-2 py-1 rounded text-xs font-mono font-bold border text-gray-600">Z: 0.0</span>
+                        </div>
+                        <p id="status-bbu" class="text-sm text-gray-600 font-medium">-</p>
+                    </div>
+
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-700">Indikator TB/U</span>
+                            <span id="z-tbu" class="bg-white px-2 py-1 rounded text-xs font-mono font-bold border text-gray-600">Z: 0.0</span>
+                        </div>
+                        <p id="status-tbu" class="text-sm text-gray-600 font-medium">-</p>
+                    </div>
+                </div>
+                
+                <a href="/data-anak" class="mt-6 block text-center w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-900 text-sm font-semibold shadow-md transition">
+                    Lihat di Buku KIA
+                </a>
+
+                <div class="mt-4 mb-6">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Tingkat Keyakinan AI (Confidence)</span>
+                        <span id="text-confidence" class="text-xs font-bold text-puskesmas">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="bar-confidence" class="bg-puskesmas h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1 italic">*Semakin tinggi persentase, semakin akurat klasifikasi SVM.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // Logika Otomatisasi Umur & Posisi
+        // ==========================================
+        document.getElementById('tanggal_lahir').addEventListener('change', function() {
+            const tglLahir = new Date(this.value);
+            const tglSekarang = new Date();
+            
+            if (!this.value) return; 
+
+            // Hitung umur secara desimal sesuai standar e-PPGBM (30.4375 hari/bulan)
+            const diffTime = tglSekarang.getTime() - tglLahir.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const umurDesimal = diffDays / 30.4375;
+            
+            // Tampilkan Info Umur ke User
+            const umurBulanBulat = Math.floor(umurDesimal);
+            const infoUmur = document.getElementById('info_umur');
+            infoUmur.innerText = `Terhitung: ${umurBulanBulat} Bulan (${diffDays} Hari)`;
+            infoUmur.classList.remove('hidden');
+
+            // Logika Penguncian Posisi Pengukuran
+            const radioBerdiri = document.getElementById('posisi_berdiri');
+            const radioTelentang = document.getElementById('posisi_telentang');
+            const labelBerdiri = document.getElementById('label_berdiri');
+            const infoPosisi = document.getElementById('info_posisi');
+
+            if (umurDesimal < 24) {
+                // Di bawah 24 bulan: Kunci ke telentang
+                radioTelentang.checked = true;
+                radioBerdiri.disabled = true;
+                labelBerdiri.classList.add('opacity-40', 'cursor-not-allowed');
+                infoPosisi.classList.remove('hidden');
+            } else {
+                // 24 bulan ke atas: Bebas, default berdiri
+                radioBerdiri.disabled = false;
+                radioBerdiri.checked = true;
+                labelBerdiri.classList.remove('opacity-40', 'cursor-not-allowed');
+                infoPosisi.classList.add('hidden');
+            }
+        });
+
+        // ==========================================
+        // Eksekusi Prediksi Klasifikasi
+        // ==========================================
+        async function submitKlasifikasi() {
+            const data = {
+                nik_ibu: document.getElementById('nik_ibu').value,
+                nama_ibu: document.getElementById('nama_ibu').value,
+                desa: document.querySelector('input[name="desa"]').value,
+                latitude: document.querySelector('input[name="latitude"]').value,
+                longitude: document.querySelector('input[name="longitude"]').value,
+                nama_anak: document.getElementById('nama_anak').value,
+                jk: document.getElementById('jk').value,
+                tanggal_lahir: document.getElementById('tanggal_lahir').value,
+                berat_badan: document.getElementById('berat_badan').value,
+                tinggi_badan: document.getElementById('tinggi_badan').value,
+                posisi_pengukuran: document.querySelector('input[name="posisi"]:checked').value,
+                timestamp_lokal: new Date().toISOString()
+            };
+
+            // Validasi Input Kosong
+            if (!data.nik_ibu || !data.nama_anak || !data.tanggal_lahir || !data.berat_badan || !data.tinggi_badan) {
+                alert("Mohon lengkapi semua data form sebelum menyimpan!");
+                return;
+            }
+
+            // KONDISI 1: OFFLINE
+            if (!navigator.onLine) {
+                let antrianOffline = JSON.parse(localStorage.getItem('antrianKIA')) || [];
+                antrianOffline.push(data);
+                localStorage.setItem('antrianKIA', JSON.stringify(antrianOffline));
+            
+                alert("Sinyal terputus! Data anak berhasil disimpan secara OFFLINE di perangkat ini. Sistem akan mengirim otomatis saat sinyal kembali.");
+            
+                document.getElementById('berat_badan').value = '';
+                document.getElementById('tinggi_badan').value = '';
+                return; 
+            }
+
+            // KONDISI 2: ONLINE
+            document.getElementById('status-awal').classList.add('hidden');
+            document.getElementById('hasil-container').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                // Tembak data ke Server Flask
+                const response = await fetch('/api/v1/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                document.getElementById('loading').classList.add('hidden');
+
+                if (result.status === 'success') {
+                    document.getElementById('hasil-container').classList.remove('hidden');
+                    
+                    document.getElementById('hasil-svm').innerText = result.kesimpulan_svm;
+
+                    const confValue = result.confidence; // Mengambil angka dari API (misal: 95.5)
+                    document.getElementById('text-confidence').innerText = confValue;
+                    document.getElementById('bar-confidence').style.width = confValue;
+                    
+                    document.getElementById('z-bbu').innerText = `Z: ${result.hasil_indikator.bbu.z}`;
+                    document.getElementById('status-bbu').innerText = result.hasil_indikator.bbu.status;
+                    
+                    document.getElementById('z-tbu').innerText = `Z: ${result.hasil_indikator.tbu.z}`;
+                    document.getElementById('status-tbu').innerText = result.hasil_indikator.tbu.status;
+
+                    document.getElementById('nama_anak').value = '';
+                    document.getElementById('berat_badan').value = '';
+                    document.getElementById('tinggi_badan').value = '';
+
+                } else if (result.status === 'warning') {
+                    document.getElementById('status-awal').classList.remove('hidden');
+                    alert(`Peringatan dari Server: ${result.message}`);
+                } else {
+                    document.getElementById('status-awal').classList.remove('hidden');
+                    alert(`Gagal menyimpan data: ${result.message}`);
+                }
+
+            } catch (error) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('status-awal').classList.remove('hidden');
+                alert("Terjadi kesalahan saat menghubungi server. Pastikan server Flask Anda menyala.");
+                console.error(error);
+            }
+        }
+
+        // ==========================================
+        // LISTENER: Otomatis sinkronisasi
+        // ==========================================
+        async function prosesSinkronisasi() {
+            let antrianOffline = JSON.parse(localStorage.getItem('antrianKIA')) || [];
+            
+            if (antrianOffline.length === 0) return; 
+            
+            console.log(`Mencoba mengirim ${antrianOffline.length} data offline...`);
+            
+            let sisaAntrian = []; 
+            let jumlahBerhasil = 0;
+
+            for (let i = 0; i < antrianOffline.length; i++) {
+                let dataBocah = antrianOffline[i];
+                
+                try {
+                    let response = await fetch('/api/v1/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dataBocah)
+                    });
+
+                    let result = await response.json();
+
+                    if (response.ok && result.status === 'success') {
+                        jumlahBerhasil++;
+                        console.log(`Sukses kirim data: ${dataBocah.nama_anak}`);
+                    } 
+                    else if (result.status === 'warning') {
+                        alert(`Data anak bernama ${dataBocah.nama_anak} DITOLAK SERVER!\nAlasan: ${result.message}\n\nData ini akan dihapus dari antrian. Silakan input ulang secara manual dengan angka yang benar.`);
+                    } 
+                    else {
+                        console.error(`Server error untuk data ${dataBocah.nama_anak}:`, result.message);
+                        sisaAntrian.push(dataBocah); 
+                    }
+
+                } catch(e) {
+                    console.error("Koneksi terputus saat mengirim:", e);
+                    sisaAntrian.push(dataBocah); 
+                }
+            }
+
+            localStorage.setItem('antrianKIA', JSON.stringify(sisaAntrian));
+
+            if (jumlahBerhasil > 0) {
+                alert(`Berhasil sinkronisasi ${jumlahBerhasil} data ke database Puskesmas!`);
+                window.location.reload(); 
+            } else if (sisaAntrian.length > 0) {
+                alert(`Gagal sinkronisasi. Sesi login mungkin habis atau server bermasalah. Data masih aman di HP Anda.`);
+            }
+        }
+
+        window.addEventListener('online', prosesSinkronisasi);
+
+        window.addEventListener('load', () => {
+            if (navigator.onLine) {
+                prosesSinkronisasi();
+            }
+        });
+        
+        // Daftarkan Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('PWA ServiceWorker berhasil didaftarkan! Scope:', registration.scope);
+                }, err => {
+                    console.log('PWA ServiceWorker gagal:', err);
+                });
+            });
+        }
+
+        function cekStatusAntrian() {
+            let antrian = JSON.parse(localStorage.getItem('antrianKIA')) || [];
+            let panel = document.getElementById('panel-sinkronisasi');
+            
+            if (antrian.length > 0) {
+                panel.classList.remove('hidden');
+                document.getElementById('angka-antrian').innerText = antrian.length;
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        setInterval(cekStatusAntrian, 1000);
+
+        async function handleCekNIK(nik) {
+    if (nik.length >= 16) { // NIK biasanya 16 digit
+        const response = await fetch(`/api/v1/cek-ortu/${nik}`);
+        const data = await response.json();
+        
+        const formLokasi = document.getElementById('form-lokasi');
+        if (data.exists) {
+            formLokasi.classList.add('hidden'); // Sembunyikan jika sudah ada
+        } else {
+            formLokasi.classList.remove('hidden'); // Munculkan jika belum ada
+        }
+    }
+}
+    </script>
+</body>
+</html>
