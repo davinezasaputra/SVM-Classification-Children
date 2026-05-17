@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Puskesmas Simpang Teritip & Sistem AI Gizi Anak</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1e3c72',
+                        secondary: '#2a5298',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-gray-800 antialiased bg-gray-50">
+
+    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-sm shadow-md transition-all duration-300 py-3 px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#home" class="flex items-center gap-3">
+                <img src="{{ url_for('static', filename='assets/img/Kabupaten-Bangka-Barat.png') }}" alt="Logo" class="h-10 w-auto" onerror="this.src='https://placehold.co/40x40?text=Pusk'">
+                <div>
+                    <span class="block font-bold text-primary text-base leading-tight">Puskesmas</span>
+                    <span class="block text-gray-500 text-xs">Simpang Teritip</span>
+                </div>
+            </a>
+            
+            <button id="mobile-menu-btn" class="lg:hidden text-gray-600 hover:text-primary focus:outline-none">
+                <i class="fa-solid fa-bars text-2xl"></i>
+            </button>
+
+            <div class="hidden lg:flex items-center gap-8">
+                <a href="#home" class="text-gray-600 font-medium hover:text-primary transition">Home</a>
+                <a href="#tentang" class="text-gray-600 font-medium hover:text-primary transition">Tentang</a>
+                <a href="#visi-misi" class="text-gray-600 font-medium hover:text-primary transition">Visi Misi</a>
+                <a href="#wilayah" class="text-gray-600 font-medium hover:text-primary transition">Wilayah Kerja</a>
+                <a href="#struktur" class="text-gray-600 font-medium hover:text-primary transition">Struktur</a>
+                <a href="{{ url_for('web.login') }}" class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-semibold shadow-lg transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login Sistem
+                </a>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden lg:hidden mt-4 pb-4 flex flex-col gap-4 text-center">
+            <a href="#home" class="text-gray-600 font-medium hover:text-primary block">Home</a>
+            <a href="#tentang" class="text-gray-600 font-medium hover:text-primary block">Tentang</a>
+            <a href="#visi-misi" class="text-gray-600 font-medium hover:text-primary block">Visi Misi</a>
+            <a href="#wilayah" class="text-gray-600 font-medium hover:text-primary block">Wilayah Kerja</a>
+            <a href="#struktur" class="text-gray-600 font-medium hover:text-primary block">Struktur</a>
+            <a href="{{ url_for('web.login') }}" class="bg-primary text-white mx-auto px-6 py-2 rounded-full font-semibold inline-block">Login Sistem</a>
+        </div>
+    </nav>
+
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+    </script>
+
+    <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80');">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary/95 to-secondary/80"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-12">
+            <div class="lg:w-7/12 text-center lg:text-left text-white">
+                <span class="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-6 uppercase tracking-wider shadow-sm">Transformasi Digital Kesehatan</span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">Sistem Klasifikasi Status Gizi Balita & Deteksi Stunting</h1>
+                <p class="text-lg md:text-xl text-blue-100 mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0">Implementasi Kecerdasan Buatan menggunakan Algoritma <strong class="text-white">Support Vector Machine (SVM)</strong> untuk memantau tumbuh kembang anak secara presisi di wilayah kerja Puskesmas Simpang Teritip.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="{{ url_for('web.login') }}" class="bg-white text-primary hover:bg-gray-100 px-8 py-3 rounded-full font-bold text-lg shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-gauge"></i> Masuk Aplikasi
+                    </a>
+                    <a href="#tentang" class="bg-transparent border-2 border-white text-white hover:bg-white/10 px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 flex justify-center items-center">
+                        Pelajari Lebih Lanjut
+                    </a>
+                </div>
+            </div>
+            <div class="hidden lg:block lg:w-5/12">
+                <img src="https://img.freepik.com/free-vector/doctor-character-background_1270-84.jpg" alt="Ilustrasi Medis" class="w-full max-w-md mx-auto rounded-2xl shadow-2xl animate-bounce" style="animation-duration: 3s;">
+            </div>
+        </div>
+    </section>
+
+    <section id="tentang" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Tentang Aplikasi & Inovasi AI</h2>
+                <p class="text-lg text-gray-600">Sinergi antara pelayanan kesehatan masyarakat dengan teknologi kecerdasan buatan.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+                    <div class="w-16 h-16 bg-blue-100 text-primary rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-3">Standardisasi Otomatis</h4>
+                    <p class="text-gray-600 leading-relaxed">Sistem mendeteksi dan mengalibrasi otomatis kesalahan posisi ukur balita (berdiri vs telentang) secara komputasi waktu nyata berdasarkan standar antropometri WHO.</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+                    <div class="w-16 h-16 bg-blue-100 text-primary rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-3">Klasifikasi Multi-Indikator</h4>
+                    <p class="text-gray-600 leading-relaxed">Mengevaluasi status gizi anak melalui 3 indikator utama (BB/U, TB/U, BB/TB) sekaligus menggunakan model cerdas SVM RBF yang diperkuat SMOTE.</p>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+                    <div class="w-16 h-16 bg-blue-100 text-primary rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-3">Validasi & Deteksi Outlier</h4>
+                    <p class="text-gray-600 leading-relaxed">Melindungi validitas data klinis dari kesalahan input petugas melalui deteksi batas deviasi ekstrem dan analisis Confidence Rate probabilitas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="visi-misi" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80" alt="Pelayanan Kesehatan" class="rounded-3xl shadow-2xl relative z-10 w-full object-cover h-[500px]">
+                        <div class="absolute -bottom-6 -right-6 w-full h-full border-4 border-primary rounded-3xl z-0 hidden md:block"></div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <span class="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">Komitmen Pelayanan</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">Visi & Misi Puskesmas Simpang Teritip</h2>
+                    
+                    <div class="bg-white p-6 rounded-2xl border-l-4 border-primary shadow-sm mb-8">
+                        <h5 class="flex items-center gap-2 text-xl font-bold text-primary mb-3">
+                            <i class="fa-solid fa-eye"></i> Visi
+                        </h5>
+                        <p class="text-gray-700 italic text-lg">"Terwujudnya Masyarakat Kecamatan Simpang Teritip yang Sehat, Mandiri, dan Berkeadilan Menuju Bangka Barat Hebat."</p>
+                    </div>
+                    
+                    <h5 class="flex items-center gap-2 text-xl font-bold text-primary mb-6">
+                        <i class="fa-solid fa-list-check"></i> Misi Utama
+                    </h5>
+                    <div class="space-y-6 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent ml-4">
+                        <div class="relative pl-8">
+                            <div class="absolute left-0 top-1.5 w-4 h-4 bg-primary rounded-full border-4 border-white shadow"></div>
+                            <h6 class="font-bold text-gray-900 mb-1">Meningkatkan Mutu Pelayanan Kesehataan</h6>
+                            <p class="text-gray-600 text-sm">Menyelenggarakan pelayanan kesehatan tingkat pertama yang bermutu, merata, dan terjangkau.</p>
+                        </div>
+                        <div class="relative pl-8">
+                            <div class="absolute left-0 top-1.5 w-4 h-4 bg-primary rounded-full border-4 border-white shadow"></div>
+                            <h6 class="font-bold text-gray-900 mb-1">Pemberdayaan Masyarakat Sehat</h6>
+                            <p class="text-gray-600 text-sm">Mendorong kemandirian hidup sehat bagi keluarga dan masyarakat beserta penyehatan lingkungan kerja.</p>
+                        </div>
+                        <div class="relative pl-8">
+                            <div class="absolute left-0 top-1.5 w-4 h-4 bg-primary rounded-full border-4 border-white shadow"></div>
+                            <h6 class="font-bold text-gray-900 mb-1">Pencegahan Stunting & Gizi Buruk</h6>
+                            <p class="text-gray-600 text-sm">Menurunkan prevalensi gizi kurang dan stunting secara masif dengan optimalisasi pendataan posyandu berbasis IT.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="wilayah" class="py-24 bg-white text-center">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Wilayah Kerja Puskesmas</h2>
+                <p class="text-lg text-gray-600">Pemantauan persebaran gizi buruk dilakukan secara intensif di desa-desa strategis wilayah Simpang Teritip.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Pelangas</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Kundi</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Simpang Yul</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Teritip</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Berang</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Mayang</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Air Nyatoh</h6>
+                </div>
+                <div class="bg-gray-50 py-6 px-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:bg-blue-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-red-500 text-2xl mb-3"></i>
+                    <h6 class="font-bold text-gray-800">Desa Rambat</h6>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="struktur" class="py-24 bg-gray-50 text-center">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Struktur Organisasi Pelayanan</h2>
+                <p class="text-lg text-gray-600">Pilar koordinasi pemantauan gizi dan operasional Posyandu.</p>
+            </div>
+            
+            <div class="flex justify-center mb-8">
+                <div class="bg-white p-8 rounded-3xl border-t-4 border-primary shadow-lg w-full max-w-sm">
+                    <div class="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-md">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <h5 class="text-xl font-bold text-gray-900 mb-1">Kepala Puskesmas</h5>
+                    <p class="text-gray-500 text-sm">Penanggung Jawab & Pengambil Kebijakan</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:block w-px h-8 bg-gray-300 mx-auto"></div>
+            <div class="hidden md:block w-2/3 h-px bg-gray-300 mx-auto"></div>
+            <div class="hidden md:flex justify-between w-2/3 mx-auto">
+                <div class="w-px h-8 bg-gray-300"></div>
+                <div class="w-px h-8 bg-gray-300"></div>
+                <div class="w-px h-8 bg-gray-300"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6 md:gap-8 mt-8 md:mt-0">
+                <div class="bg-white p-6 rounded-3xl shadow border border-gray-100 hover:shadow-lg transition-all">
+                    <div class="w-16 h-16 bg-gray-600 text-white rounded-full flex items-center justify-center text-xl mx-auto mb-4">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h6 class="text-lg font-bold text-gray-900 mb-1">Kasubag Tata Usaha</h6>
+                    <p class="text-gray-500 text-sm">Manajemen Berkas & Administrasi Sistem</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-3xl shadow border border-gray-100 hover:shadow-lg transition-all">
+                    <div class="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center text-xl mx-auto mb-4">
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </div>
+                    <h6 class="text-lg font-bold text-gray-900 mb-1">Nutrisionis / Ahli Gizi</h6>
+                    <p class="text-gray-500 text-sm">Validator Diagnosa AI & Intervensi Klinis</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-3xl shadow border border-gray-100 hover:shadow-lg transition-all">
+                    <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl mx-auto mb-4">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h6 class="text-lg font-bold text-gray-900 mb-1">Kader Posyandu</h6>
+                    <p class="text-gray-500 text-sm">Operator Input Data Lapangan</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-primary text-white pt-16 pb-8 border-t-[10px] border-secondary">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-white/20 pb-8 mb-8">
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
+                        <img src="{{ url_for('static', filename='assets/img/Kabupaten-Bangka-Barat.png') }}" alt="Logo" class="h-12 brightness-0 invert opacity-90" onerror="this.src='https://placehold.co/48x48?text=Pusk'">
+                        <h3 class="text-2xl font-bold tracking-tight">Puskesmas<br><span class="text-lg font-normal text-blue-200">Simpang Teritip</span></h3>
+                    </div>
+                    <p class="text-blue-200 text-sm max-w-sm">Kecamatan Simpang Teritip, Kabupaten Bangka Barat, Kepulauan Bangka Belitung.</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-blue-200">
+                <p>&copy; 2026 Proyek Skripsi Universitas. All Rights Reserved.</p>
+                <p>Dikembangkan oleh <strong class="text-white">Davin</strong> - Teknik Informatika</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
