@@ -5,15 +5,20 @@ from app.models import User, Anak, PemantauanPerkembanganGiziAnak
 
 
 web = Blueprint('web', __name__)
+
+@web.route('/')
+def landing_page():
+    return render_template('landing_page.html')
+
 @web.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('web.home'))
+        return redirect(url_for('web.dashboard'))
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form['username']).first()
         if u and check_password_hash(u.password, request.form['password']):
             login_user(u)
-            return redirect(url_for('web.home'))
+            return redirect(url_for('web.dashboard'))
         flash('Username atau Password Salah!')
     return render_template('login.html')
 
@@ -23,9 +28,9 @@ def logout():
     logout_user()
     return redirect(url_for('web.login'))
 
-@web.route('/')
+@web.route('/dashboard')
 @login_required
-def home():
+def dashboard():
     return render_template('dashboard.html', user=current_user)
 
 @web.route('/input')

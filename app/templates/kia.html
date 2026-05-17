@@ -43,6 +43,8 @@
                                 <th class="p-3 border text-center">BB (kg)</th>
                                 <th class="p-3 border text-center">TB (cm)</th>
                                 <th class="p-3 border">Z-Score BB/U</th>
+                                <th class="p-3 border">Z-Score BB/U</th>
+                                <th class="p-3 border">Z-Score BB/TB</th>
                                 <th class="p-3 border bg-teal-100 font-bold text-teal-900">Klasifikasi AI</th>
                             </tr>
                         </thead>
@@ -56,6 +58,10 @@
                                 <td class="p-3 border">
                                     <span class="block text-xs font-mono text-gray-400">Z: {{ c.z_bbu|round(2) }}</span>
                                     {{ c.status_bbu }}
+                                </td>
+                                <td class="p-3 border">
+                                    <span class="block text-xs font-mono text-gray-400">Z: {{ c.z_tbu|round(2) }}</span>
+                                    {{ c.status_tbu }}
                                 </td>
                                 <td class="p-3 border font-bold bg-teal-50 text-teal-800">
                                     <span class="block text-xs font-mono text-teal-500">Z: {{ c.z_bbtb|round(2) }}</span>
