@@ -535,5 +535,238 @@
 
     </main>
 
+    <script>
+        // ==========================================
+        // Logika Otomatisasi Umur & Posisi
+        // ==========================================
+        document.getElementById('tanggal_lahir').addEventListener('change', function() {
+            const tglLahir = new Date(this.value);
+            const tglSekarang = new Date();
+            
+            if (!this.value) return; 
+
+            // Hitung umur secara desimal sesuai standar e-PPGBM (30.4375 hari/bulan)
+            const diffTime = tglSekarang.getTime() - tglLahir.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const umurDesimal = diffDays / 30.4375;
+            
+            // Tampilkan Info Umur ke User
+            const umurBulanBulat = Math.floor(umurDesimal);
+            const infoUmur = document.getElementById('info_umur');
+            infoUmur.innerText = `Terhitung: ${umurBulanBulat} Bulan (${diffDays} Hari)`;
+            infoUmur.classList.remove('hidden');
+
+            // Logika Penguncian Posisi Pengukuran
+            const radioBerdiri = document.getElementById('posisi_berdiri');
+            const radioTelentang = document.getElementById('posisi_telentang');
+            const labelBerdiri = document.getElementById('label_berdiri');
+            const infoPosisi = document.getElementById('info_posisi');
+
+            if (umurDesimal < 24) {
+                // Di bawah 24 bulan: Kunci ke telentang
+                radioTelentang.checked = true;
+                radioBerdiri.disabled = true;
+                labelBerdiri.classList.add('opacity-40', 'cursor-not-allowed');
+                infoPosisi.classList.remove('hidden');
+            } else {
+                // 24 bulan ke atas: Bebas, default berdiri
+                radioBerdiri.disabled = false;
+                radioBerdiri.checked = true;
+                labelBerdiri.classList.remove('opacity-40', 'cursor-not-allowed');
+                infoPosisi.classList.add('hidden');
+            }
+        });
+
+        // ==========================================
+        // Eksekusi Prediksi Klasifikasi
+        // ==========================================
+        async function submitKlasifikasi() {
+            const data = {
+                nik_ibu: document.getElementById('nik_ibu').value,
+                nama_ibu: document.getElementById('nama_ibu').value,
+                desa: document.querySelector('input[name="desa"]').value,
+                latitude: document.querySelector('input[name="latitude"]').value,
+                longitude: document.querySelector('input[name="longitude"]').value,
+                nama_anak: document.getElementById('nama_anak').value,
+                jk: document.getElementById('jk').value,
+                tanggal_lahir: document.getElementById('tanggal_lahir').value,
+                berat_badan: document.getElementById('berat_badan').value,
+                tinggi_badan: document.getElementById('tinggi_badan').value,
+                posisi_pengukuran: document.querySelector('input[name="posisi"]:checked').value,
+                timestamp_lokal: new Date().toISOString()
+            };
+
+            // Validasi Input Kosong
+            if (!data.nik_ibu || !data.nama_anak || !data.tanggal_lahir || !data.berat_badan || !data.tinggi_badan) {
+                alert("Mohon lengkapi semua data form sebelum menyimpan!");
+                return;
+            }
+
+            // KONDISI 1: OFFLINE
+            if (!navigator.onLine) {
+                let antrianOffline = JSON.parse(localStorage.getItem('antrianKIA')) || [];
+                antrianOffline.push(data);
+                localStorage.setItem('antrianKIA', JSON.stringify(antrianOffline));
+            
+                alert("Sinyal terputus! Data anak berhasil disimpan secara OFFLINE di perangkat ini. Sistem akan mengirim otomatis saat sinyal kembali.");
+            
+                document.getElementById('berat_badan').value = '';
+                document.getElementById('tinggi_badan').value = '';
+                return; 
+            }
+
+            // KONDISI 2: ONLINE
+            document.getElementById('status-awal').classList.add('hidden');
+            document.getElementById('hasil-container').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                // Tembak data ke Server Flask
+                const response = await fetch('/api/v1/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                document.getElementById('loading').classList.add('hidden');
+
+                if (result.status === 'success') {
+                    document.getElementById('hasil-container').classList.remove('hidden');
+                    
+                    document.getElementById('hasil-svm').innerText = result.kesimpulan_svm;
+
+                    const confValue = result.confidence; // Mengambil angka dari API (misal: 95.5)
+                    document.getElementById('text-confidence').innerText = confValue;
+                    document.getElementById('bar-confidence').style.width = confValue;
+                    
+                    document.getElementById('z-bbu').innerText = `Z: ${result.hasil_indikator.bbu.z}`;
+                    document.getElementById('status-bbu').innerText = result.hasil_indikator.bbu.status;
+                    
+                    document.getElementById('z-tbu').innerText = `Z: ${result.hasil_indikator.tbu.z}`;
+                    document.getElementById('status-tbu').innerText = result.hasil_indikator.tbu.status;
+
+                    document.getElementById('nama_anak').value = '';
+                    document.getElementById('berat_badan').value = '';
+                    document.getElementById('tinggi_badan').value = '';
+
+                } else if (result.status === 'warning') {
+                    document.getElementById('status-awal').classList.remove('hidden');
+                    alert(`Peringatan dari Server: ${result.message}`);
+                } else {
+                    document.getElementById('status-awal').classList.remove('hidden');
+                    alert(`Gagal menyimpan data: ${result.message}`);
+                }
+
+            } catch (error) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('status-awal').classList.remove('hidden');
+                alert("Terjadi kesalahan saat menghubungi server. Pastikan server Flask Anda menyala.");
+                console.error(error);
+            }
+        }
+
+        // ==========================================
+        // LISTENER: Otomatis sinkronisasi
+        // ==========================================
+        async function prosesSinkronisasi() {
+            let antrianOffline = JSON.parse(localStorage.getItem('antrianKIA')) || [];
+            
+            if (antrianOffline.length === 0) return; 
+            
+            console.log(`Mencoba mengirim ${antrianOffline.length} data offline...`);
+            
+            let sisaAntrian = []; 
+            let jumlahBerhasil = 0;
+
+            for (let i = 0; i < antrianOffline.length; i++) {
+                let dataBocah = antrianOffline[i];
+                
+                try {
+                    let response = await fetch('/api/v1/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dataBocah)
+                    });
+
+                    let result = await response.json();
+
+                    if (response.ok && result.status === 'success') {
+                        jumlahBerhasil++;
+                        console.log(`Sukses kirim data: ${dataBocah.nama_anak}`);
+                    } 
+                    else if (result.status === 'warning') {
+                        alert(`Data anak bernama ${dataBocah.nama_anak} DITOLAK SERVER!\nAlasan: ${result.message}\n\nData ini akan dihapus dari antrian. Silakan input ulang secara manual dengan angka yang benar.`);
+                    } 
+                    else {
+                        console.error(`Server error untuk data ${dataBocah.nama_anak}:`, result.message);
+                        sisaAntrian.push(dataBocah); 
+                    }
+
+                } catch(e) {
+                    console.error("Koneksi terputus saat mengirim:", e);
+                    sisaAntrian.push(dataBocah); 
+                }
+            }
+
+            localStorage.setItem('antrianKIA', JSON.stringify(sisaAntrian));
+
+            if (jumlahBerhasil > 0) {
+                alert(`Berhasil sinkronisasi ${jumlahBerhasil} data ke database Puskesmas!`);
+                window.location.reload(); 
+            } else if (sisaAntrian.length > 0) {
+                alert(`Gagal sinkronisasi. Sesi login mungkin habis atau server bermasalah. Data masih aman di HP Anda.`);
+            }
+        }
+
+        window.addEventListener('online', prosesSinkronisasi);
+
+        window.addEventListener('load', () => {
+            if (navigator.onLine) {
+                prosesSinkronisasi();
+            }
+        });
+        
+        // Daftarkan Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('PWA ServiceWorker berhasil didaftarkan! Scope:', registration.scope);
+                }, err => {
+                    console.log('PWA ServiceWorker gagal:', err);
+                });
+            });
+        }
+
+        function cekStatusAntrian() {
+            let antrian = JSON.parse(localStorage.getItem('antrianKIA')) || [];
+            let panel = document.getElementById('panel-sinkronisasi');
+            
+            if (antrian.length > 0) {
+                panel.classList.remove('hidden');
+                document.getElementById('angka-antrian').innerText = antrian.length;
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        setInterval(cekStatusAntrian, 1000);
+
+        async function handleCekNIK(nik) {
+    if (nik.length >= 16) { // NIK biasanya 16 digit
+        const response = await fetch(`/api/v1/cek-ortu/${nik}`);
+        const data = await response.json();
+        
+        const formLokasi = document.getElementById('form-lokasi');
+        if (data.exists) {
+            formLokasi.classList.add('hidden'); // Sembunyikan jika sudah ada
+        } else {
+            formLokasi.classList.remove('hidden'); // Munculkan jika belum ada
+        }
+    }
+}
+    </script>
+
 </body>
 </html>
