@@ -16,8 +16,9 @@
         .tab-active { border-bottom: 3px solid #0d9488; color: #0d9488; font-weight: 700; }
     </style>
 </head>
-<body class="bg-slate-50 relative"> <div class="h-screen overflow-hidden"> 
-        
+<body class="bg-slate-50">
+
+    <div class="flex h-screen overflow-hidden">
         <aside id="sidebar" class="w-64 bg-teal-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 h-screen shadow-2xl">
             <button onclick="toggleSidebar()" class="absolute top-4 right-4 md:hidden text-teal-300 hover:text-white p-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,31 +49,152 @@
             </div>
         </aside>
 
-        <main class="absolute inset-0 md:pl-64 flex flex-col h-screen overflow-y-auto w-full transition-all duration-300">
-            <header class="bg-white shadow-sm p-4 flex justify-between items-center w-full sticky top-0 z-40">
+        <main class="flex-1 flex flex-col overflow-y-auto md:ml-64">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center w-full">
                 <div class="flex items-center gap-3">
                     <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    <h2 id="tab-title" class="text-base sm:text-lg font-bold text-slate-800">Ringkasan Statistik Gizi</h2>
+                        <h2 id="tab-title" class="text-base sm:text-lg font-bold text-slate-800">Ringkasan Statistik Gizi</h2>
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-4">
                     <span class="text-sm text-slate-500 hidden sm:inline-block">Halo, {{ user.role }}</span>
-                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">PT</div>
+                <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">PT</div>
                 </div>
             </header>
 
-            <div class="p-4 md:p-8"> <section id="tab-dashboard" class="space-y-8">
-                    </section>
-                
+            <div class="p-8">
+                <section id="tab-dashboard" class="space-y-8">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1">Total Balita</p>
+                            <h3 id="stat-total" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-teal-600 font-medium mt-2">↑ Data terdaftar</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1 text-red-500">Gizi Buruk</p>
+                            <h3 id="stat-buruk" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-slate-400 mt-2">Status per hari ini</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1 text-orange-500">Stunting / Pendek</p>
+                            <h3 id="stat-stunting" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-slate-400 mt-2">Perlu intervensi khusus</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <p class="text-slate-500 text-xs font-bold uppercase mb-1 text-teal-500">Gizi Baik</p>
+                            <h3 id="stat-baik" class="text-3xl font-black text-slate-800">-</h3>
+                            <p class="text-xs text-teal-600 font-medium mt-2">Kondisi Normal</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                            <h4 class="font-bold text-slate-800 mb-4 text-center">Distribusi Gizi SVM</h4>
+                            <div class="relative h-64 w-full">
+                                <canvas id="chartGizi"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1">
+                            <h4 class="font-bold text-slate-800 mb-4 text-center">Sebaran per Desa</h4>
+                            <div class="relative h-64 w-full">
+                                <canvas id="chartDesa"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1 flex flex-col">
+                            <h4 class="font-bold text-slate-800 mb-4">Aksi Cepat Petugas</h4>
+                            
+                            <div class="space-y-3 overflow-y-auto pr-2" style="max-height: 256px;">
+                                <a href="{{ url_for('web.input_data') }}" class="flex items-center justify-between p-3 bg-teal-50 rounded-xl border border-teal-100 hover:bg-teal-100 transition">
+                                    <span class="text-teal-900 font-semibold text-sm">Input Pengukuran Baru</span>
+                                    <span class="text-teal-600 font-bold">→</span>
+                                </a>
+                                <button onclick="switchTab('pencarian')" class="w-full flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition text-left">
+                                    <span class="text-slate-700 font-semibold text-sm">Cari Riwayat Medis Anak</span>
+                                    <span class="text-slate-400 font-bold">→</span>
+                                </button>
+                                <a href="{{ url_for('web.data_anak') }}" class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition text-left">
+                                    <span class="text-slate-700 font-semibold text-sm">Lihat Seluruh Tabel Data</span>
+                                    <span class="text-slate-400 font-bold">→</span>
+                                </a>
+
+                                {% if user.role|lower == 'admin' %}
+                                <div class="border-t border-slate-200 pt-3 mt-3">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Menu Administrator</p>
+                                    
+                                    <div class="space-y-3">
+                                        <a href="{{ url_for('admin.sistem_log') }}" class="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition text-left">
+                                            <span class="text-indigo-900 font-semibold text-sm">Logs Aktivitas User</span>
+                                            <span class="text-indigo-600 font-bold">→</span>
+                                        </a>
+                                        <a href="{{ url_for('admin.manajemen_akun') }}" class="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition text-left">
+                                            <span class="text-indigo-900 font-semibold text-sm">Manage Akun User</span>
+                                            <span class="text-indigo-600 font-bold">→</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold mb-4 text-slate-800">Peta Sebaran Lokasi Balita</h4>
+                        <div id="map" class="h-96 rounded-xl border-2 border-slate-200 z-0 relative"></div>
+                    </div>
+                </section>
+
                 <section id="tab-pencarian" class="hidden space-y-6">
-                    </section>
-                
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="relative max-w-2xl mx-auto mb-8">
+                            <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Masukkan 16 Digit NIK Ibu atau Nama Anak..." 
+                                class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-100 focus:border-teal-500 focus:ring-4 focus:ring-teal-50 outline-none transition text-lg">
+                            <svg class="w-6 h-6 absolute left-4 top-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-6 py-4">NIK Ibu</th>
+                                        <th class="px-6 py-4">Nama Anak</th>
+                                        <th class="px-6 py-4">Nama Ibu</th>
+                                        <th class="px-6 py-4">Status Gizi Terakhir</th>
+                                        <th class="px-6 py-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" class="divide-y divide-slate-100">
+                                    <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Gunakan kotak di atas untuk mencari data.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
                 <section id="tab-informasi" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </section>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">01</div>
+                        <h4 class="font-bold text-slate-800 mb-2">Pentingnya ASI Eksklusif</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">ASI adalah nutrisi terbaik untuk bayi usia 0-6 bulan untuk membangun daya tahan tubuh yang kuat.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">02</div>
+                        <h4 class="font-bold text-slate-800 mb-2">Jadwal Vitamin A</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Pastikan balita mendapatkan kapsul vitamin A setiap bulan Februari dan Agustus di Posyandu.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">03</div>
+                        <h4 class="font-bold text-slate-800 mb-2">MPASI Bergizi</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Setelah 6 bulan, bayi memerlukan makanan pendamping yang kaya zat besi dan protein hewani.</p>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
