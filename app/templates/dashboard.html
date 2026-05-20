@@ -20,7 +20,7 @@
 
     <div class="flex h-screen overflow-hidden">
         <aside id="sidebar" class="w-64 bg-teal-900 text-white flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 h-screen shadow-2xl">
-            <button onclick = "toggleSidebar()" class="absolute top-4 right-4 md:hidden text-white focus:outline-none">
+            <button onclick = "toggleSidebar()" class="absolute top-4 right-4 md:hidden text-teal-300 hover:text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -190,6 +190,15 @@
 
     <script>
         let map; // Variabel global untuk peta
+        function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        
+        // Memanipulasi class -translate-x-full (geser keluar layar)
+        sidebar.classList.toggle('-translate-x-full');
+        
+        // Memungkinkan sidebar di desktop juga ikut bisa ditutup
+        sidebar.classList.toggle('md:translate-x-0');
+    }
 
         // Logika Navigasi Tab
         function switchTab(tabId) {
@@ -346,15 +355,7 @@
                   .catch(err => console.log('PWA SW gagal', err));
             });
         }
-        function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        
-        // Memanipulasi class -translate-x-full (geser keluar layar)
-        sidebar.classList.toggle('-translate-x-full');
-        
-        // Memungkinkan sidebar di desktop juga ikut bisa ditutup
-        sidebar.classList.toggle('md:translate-x-0');
-    }
+
     </script>
 </body>
 </html>
