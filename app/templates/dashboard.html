@@ -14,8 +14,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { border-bottom: 3px solid #0d9488; color: #0d9488; font-weight: 700; }
-      
-        
         
         @media (min-width: 640px) {
             .sm\:inline-block { display: inline-block !important; }
@@ -27,7 +25,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 relative">
+<body class="flex h-screen overflow-hidden bg-slate-50">
     <div class="flex h-screen overflow-hidden">
         <aside id="sidebar" class="w-64 bg-teal-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 h-screen shadow-2xl">
             <button onclick="toggleSidebar()" class="absolute top-4 right-4 md:hidden text-teal-300 hover:text-white p-2">
@@ -60,7 +58,7 @@
             </div>
         </aside>
 
-        <main class="absolute inset-0 md:pl-64 flex flex-col h-screen overflow-y-auto w-full transition-all duration-300">
+        <main class="flex-1 flex flex-col h-screen overflow-y-auto w-full transition-all duration-300 md:ml-64">
             <header class="bg-white shadow-sm p-4 flex justify-between items-center w-full sticky top-0 z-40">
                 <div class="flex items-center gap-3">
                     <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
