@@ -73,7 +73,7 @@
             </header>
 
             <div class="p-4 md:p-8">
-                <section id="tab-dashboard" class="space-y-8">
+                <section id="tab-dashboard" class="tab-content opacity-100 translate-y-0 transition-all duration-300 space-y-8">
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -157,7 +157,7 @@
                     </div>
                 </section>
 
-                <section id="tab-pencarian" class="hidden space-y-6">
+                <section id="tab-pencarian" class="tab-content hidden opacity-0 translate-y-4 transition-all duration-300 space-y-6">
                     <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
                         <div class="relative max-w-2xl mx-auto mb-8">
                             <input type="text" id="searchInput" onkeyup="filterData()" placeholder="Masukkan 16 Digit NIK Ibu atau Nama Anak..." 
@@ -184,7 +184,7 @@
                     </div>
                 </section>
 
-                <section id="tab-informasi" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <section id="tab-pencarian" class="tab-content hidden opacity-0 translate-y-4 transition-all duration-300 space-y-6">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-lg transition">
                         <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-4 font-bold">01</div>
                         <h4 class="font-bold text-slate-800 mb-2">Pentingnya ASI Eksklusif</h4>
@@ -220,23 +220,30 @@
         }
 
         function switchTab(tabId) {
-            document.getElementById('tab-dashboard').classList.add('hidden');
-            document.getElementById('tab-pencarian').classList.add('hidden');
-            document.getElementById('tab-informasi').classList.add('hidden');
-
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => {
+                    tab.classList.add('hidden');
+                }, 200);
+            });
+            setTimeout(() => {
+                const activeTab = document.getElementById('tab-' + tabId);
+                activeTab.classList.remove('hidden');
+                activeTab.offsetHeight;
+                activeTab.classList.remove('opacity-0', 'translate-y-4');
+            }, 220);
             const titles = {
-                'dashboard': 'Ringkasan Statistik Gizi',
-                'pencarian': 'Pencarian Data Balita',
-                'informasi': 'Informasi Edukasi Gizi'
+                dashboard: 'Ringkasan Statistik Gizi',
+                pencarian: 'Pencarian Data Balita',
+                informasi: 'Informasi Edukasi Gizi'
             };
             document.getElementById('tab-title').innerText = titles[tabId];
-
+            closeSidebar();
             if (tabId === 'dashboard' && map) {
-                setTimeout(function() {
+                setTimeout(() => {
                     map.invalidateSize();
-                }, 100);
+                }, 300);
             }
         }
 
