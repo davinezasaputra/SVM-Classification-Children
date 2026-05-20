@@ -9,8 +9,11 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         # Buat user admin default jika belum ada
-        if not User.query.filter_by(username='admin').first():
-            db.session.add(User(username='admin', password=generate_password_hash('admin123'), nama='Admin Puskesmas'))
+        if not User.query.filter_by(username='KaderTest').first():
+            db.session.add(User(username='KaderTest', password=generate_password_hash('#KaderPuskesmas123'), nama='Kader Puskesmas'))
+            db.session.commit()
+        if not User.query.filter_by(username='AdminTest').first():
+            db.session.add(User(username='AdminTest', password=generate_password_hash('#AdminPuskesmas123'), nama='Admin Puskesmas', role='admin'))
             db.session.commit()
             
     MODE_DEBUG = os.environ.get('FLASK_DEBUG', 'True') == 'True'
