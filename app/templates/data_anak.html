@@ -86,7 +86,7 @@
                             <td class="p-4">${anak.jk}</td>
                             <td class="p-4"><span class="${warnaStatus}">${anak.status_terakhir}</span></td>
                             <td class="p-4 flex gap-2 justify-center">
-                                <a href="{{ url_for('web.buku_kia', id=id_anak.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow">Buku KIA</a>
+                                <a href="/kia/${anak.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow">Buku KIA</a>
                                 <button onclick="hapusAnak(${anak.id}, '${anak.nama_anak}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow">Hapus</button>
                             </td>
                         </tr>
