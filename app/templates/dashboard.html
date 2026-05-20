@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Puskesmas Simpang Teritip</title>
     <link rel="manifest" href="/static/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
     <meta name="theme-color" content="#0d9488">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,10 +15,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { border-bottom: 3px solid #0d9488; color: #0d9488; font-weight: 700; }
-        
-        @media (min-width: 640px) {
-            .sm\:inline-block { display: inline-block !important; }
-        }
     </style>
 </head>
 
@@ -25,7 +22,7 @@
     
     <div class="flex h-screen overflow-hidden w-full relative">
         
-        <aside id="sidebar" class="w-64 bg-teal-900 text-white fixed inset-y-0 left-0 z-50 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <aside id="sidebar"class="w-64 bg-teal-900 text-white fixed inset-y-0 left-0 z-50 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
 
             <button onclick="toggleSidebar()" class="absolute top-4 right-4 md:hidden text-teal-300 hover:text-white p-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +54,7 @@
         </aside>
         <div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-        <main class="flex-1 flex flex-col h-screen overflow-y-auto transition-all duration-300 md:ml-64">
+        <main class="relative z-10 flex-1 flex flex-col h-screen overflow-y-auto transition-all duration-300 md:ml-64">
             
             <header class="bg-white shadow-sm p-4 flex justify-between items-center w-full sticky top-0 z-40">
                 <div class="flex items-center gap-3">
@@ -213,7 +210,6 @@
         let chartGiziInstance = null;
         let chartDesaInstance = null;
         function toggleSidebar() {
-            
             if (window.innerWidth >= 768) return;
 
             const sidebar = document.getElementById('sidebar');
