@@ -20,18 +20,17 @@
         }
         @media (min-width: 768px) {
             .md\:hidden { display: none !important; }
-        
-            .md\:pl-64 { padding-left: 16rem !important; } 
             .md\:translate-x-0 { transform: translateX(0) !important; }
         }
     </style>
 </head>
 
-<body class="bg-slate-50"> 
+<body class="bg-slate-50 overflow-hidden"> 
     
     <div class="flex h-screen overflow-hidden w-full relative">
         
-        <aside id="sidebar" class="w-64 bg-teal-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 h-screen shadow-2xl">
+        <aside id="sidebar" class="w-64 bg-teal-900 text-white fixed inset-y-0 left-0 z-50 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+
             <button onclick="toggleSidebar()" class="absolute top-4 right-4 md:hidden text-teal-300 hover:text-white p-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -60,8 +59,9 @@
                 <a href="{{ url_for('web.logout') }}" class="text-sm text-teal-400 hover:text-white">Keluar Sistem</a>
             </div>
         </aside>
+        <div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-        <main class="flex-1 flex flex-col h-screen overflow-y-auto w-full transition-all duration-300 md:pl-64">
+        <main class="flex-1 flex flex-col h-screen overflow-y-auto transition-all duration-300 md:ml-64">
             
             <header class="bg-white shadow-sm p-4 flex justify-between items-center w-full sticky top-0 z-40">
                 <div class="flex items-center gap-3">
@@ -214,10 +214,17 @@
 
     <script>
         let map;
+        let chartGiziInstance = null;
+        let chartDesaInstance = null;
         function toggleSidebar() {
+            
+            if (window.innerWidth >= 768) return;
+
             const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
             sidebar.classList.toggle('-translate-x-full');
-            sidebar.classList.toggle('md:translate-x-0');
+            overlay.classList.toggle('hidden');
         }
 
         function switchTab(tabId) {
@@ -332,7 +339,10 @@
                     document.getElementById('stat-baik').innerText = d.summary.baik;
                 }
 
-                new Chart(document.getElementById('chartGizi'), {
+                if (chartGiziInstance) chartGiziInstance.destroy();
+                if (chartDesaInstance) chartDesaInstance.destroy();
+
+                chartGiziInstance = new Chart(document.getElementById('chartGizi'), {
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(d.gizi),
@@ -341,7 +351,7 @@
                     options: { maintainAspectRatio: false }
                 });
 
-                new Chart(document.getElementById('chartDesa'), {
+                chartDesaInstance = new Chart(document.getElementById('chartDesa'), {
                     type: 'bar',
                     data: {
                         labels: Object.keys(d.desa),
