@@ -154,7 +154,7 @@ def hapus_anak(id_anak):
     anak = Anak.query.get_or_404(id_anak)
     db.session.delete(anak)
     message_log = f"menghapus seluruh data anak termasuk data perkembangan anak: {anak.nama_anak} (NIK Ibu: {anak.nik_ibu}) oleh {current_user.nama}"
-    new_log = LogAktivitas(user_id=current_user.id, action= message_log)
+    new_log = LogAktivitas(user_id=current_user.id, aksi= message_log)
     db.session.add(new_log)
     db.session.commit()
     return jsonify({'status': 'success', 'message': 'Data dihapus'})
