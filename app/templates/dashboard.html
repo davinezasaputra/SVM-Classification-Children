@@ -19,10 +19,10 @@
 <body class="bg-slate-50">
 
     <div class="flex h-screen overflow-hidden">
-        <aside id="sidebar" class="w-64 bg-teal-900 text-white flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 h-screen shadow-2xl">
-            <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-50 p-2 bg-teal-800 text-white rounded-md shadow-md hover:bg-teal-700 transition">
+        <aside id="sidebar" class="w-64 bg-teal-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 h-screen shadow-2xl">
+            <button onclick="toggleSidebar()" class="absolute top-4 right-4 md:hidden text-teal-300 hover:text-white p-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
             <div class="p-6">
@@ -30,28 +30,39 @@
                 <h1 class="text-xl font-black tracking-tighter uppercase">Puskesmas Simpang Teritip</h1>
                 <p class="text-xs text-teal-300">Sistem Informasi Gizi SVM</p>
             </div>
+    
             <nav class="flex-1 px-4 space-y-2 mt-4">
                 <a href="#" onclick="switchTab('dashboard')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Dashboard Utama</a>
                 <a href="#" onclick="switchTab('pencarian')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Pencarian Data</a>
                 <a href="{{ url_for('web.input_data') }}" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Input Data Baru</a>
+                
                 {% if user.role == 'admin' %}
                 <a href="{{ url_for('admin.manajemen_akun') }}" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Manajemen Akun</a>
                 <a href="{{ url_for('admin.sistem_log') }}" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Sistem Log</a>
                 {% endif %}
-                <a href="#" onclick="switchTab('informasi')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Info & Edukasi</a>
                 
+                <a href="#" onclick="switchTab('informasi')" class="block py-3 px-4 rounded-lg hover:bg-teal-800 transition font-medium">Info & Edukasi</a>
             </nav>
+    
             <div class="p-4 border-t border-teal-800">
                 <a href="{{ url_for('web.logout') }}" class="text-sm text-teal-400 hover:text-white">Keluar Sistem</a>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col overflow-y-auto md:ml-64">
-            <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
-                <h2 id="tab-title" class="text-lg font-bold text-slate-800">Ringkasan Statistik Gizi</h2>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-slate-500">Halo, {{ user.role}}</span>
-                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xs">PT</div>
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center w-full">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                        <h2 id="tab-title" class="text-base sm:text-lg font-bold text-slate-800">Ringkasan Statistik Gizi</h2>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-sm text-slate-500 hidden sm:inline-block">Halo, {{ user.role }}</span>
+                <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">PT</div>
                 </div>
             </header>
 
