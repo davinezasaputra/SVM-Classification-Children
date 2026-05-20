@@ -10,7 +10,7 @@
     <nav class="bg-teal-600 p-4 text-white flex justify-between shadow-md">
         <div class="space-x-6">
             <span class="font-bold uppercase tracking-widest">SVM Simpang Teritip</span>
-            <a href="{{ url_for('web.form_klasifikasi') }}" class="text-teal-100 hover:text-white">Form Klasifikasi</a>
+            <a href="{{ url_for('web.input_data') }}" class="text-teal-100 hover:text-white">Form Klasifikasi</a>
             <a href="{{ url_for('web.data_anak') }}" class="text-white font-bold border-b-2">Data Anak</a>
         </div>
         <span>Halo, {{ user.nama }} | <a href="{{ url_for('web.logout') }}" class="underline hover:text-teal-200">Keluar</a></span>
@@ -30,7 +30,7 @@
                         Download Excel
                     </button>
                     
-                    <a href="{{ url_for('web.form_klasifikasi') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">
+                    <a href="{{ url_for('web.input_data') }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition">
                         + Tambah Pengukuran Baru
                     </a>
                 </div>
