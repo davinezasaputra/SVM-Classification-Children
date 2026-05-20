@@ -10,18 +10,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="bg-slate-50 font-sans">
+<body  class="bg-gradient-to-br from-slate-50 to-slate-100">
+    <div id="panel-sinkronisasi" class="hidden bg-orange-100 border-l-4 border-orange-500 p-4 mb-6 rounded-r-lg shadow-sm">
+        </div>  
 
-    <nav class="bg-puskesmas p-4 text-white flex justify-between items-center shadow-md">
-        <div class="space-x-6 flex items-center">
-            <span class="font-bold uppercase tracking-widest text-lg mr-4">SVM</span>
-            <a href="/" class="text-white font-bold border-b-2 border-white pb-1">Form Klasifikasi</a>
-            <a href="/data-anak" class="text-teal-100 hover:text-white transition pb-1">Data Anak</a>
-        </div>
-        <div id="panel-sinkronisasi" class="hidden bg-orange-100 border-l-4 border-orange-500 p-4 mb-6 rounded-r-lg shadow-sm">
-        </div>
-        <div class="text-sm">
-            <span>Halo, Petugas | <a href="/logout" class="underline hover:text-teal-200">Keluar</a></span>
+    <nav class="sticky top-0 z-50 backdrop-blur-lg bg-teal-700/90 border-b border-white/10 shadow-lg px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <span class="font-black uppercase tracking-[0.3em] text-xl"> SVM </span>
+                <a href="/" class="text-white font-semibold border-b-2 border-white pb-1">Form Klasifikasi </a> 
+                <a href="/data-anak" class="text-teal-100 hover:text-white transition">Data Anak </a>
+            </div>
+
+            <div class="text-sm text-white">Halo, Petugas | 
+                <a href="/logout"class="underline hover:text-teal-200 transition">Keluar </a>
+            </div>
         </div>
     </nav>
 
@@ -45,13 +48,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div class="col-span-1 sm:col-span-2">
                     <label class="block text-sm font-semibold text-gray-600 mb-1">NIK Ibu</label>
-                    <input type="text" id="nik_ibu" oninput="handleCekNIK(this.value)" name="nik_ibu" class="w-full border p-3 rounded-lg bg-gray-50 focus:ring-2 focus:ring-puskesmas outline-none" placeholder="Masukkan 16 Digit NIK">
+                    <input type="text" id="nik_ibu" oninput="handleCekNIK(this.value)" name="nik_ibu" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 focus:ring-4 focus:ring-teal-100 focus:border-teal-500 outline-none transition-all duration-200" placeholder="Masukkan 16 Digit NIK">
                 </div>
                 <div id="form-lokasi" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
                     <p class="text-sm text-blue-600 mb-2 font-semibold italic">* Data Ibu baru terdeteksi. Silakan lengkapi lokasi domisili.</p>
-                    <input type="text" name="desa" placeholder="Nama Desa" class="border p-2 w-full mb-2">
-                    <input type="text" name="latitude" placeholder="Latitude" class="border p-2 w-full mb-2">
-                    <input type="text" name="longitude" placeholder="Longitude" class="border p-2 w-full">
+                    <input type="text" name="desa" placeholder="Nama Desa" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 focus:ring-4 focus:ring-teal-100 focus:border-teal-500 outline-none transition-all duration-200">
+                    <input type="text" name="latitude" placeholder="Latitude" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 focus:ring-4 focus:ring-teal-100 focus:border-teal-500 outline-none transition-all duration-200">
+                    <input type="text" name="longitude" placeholder="Longitude" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 focus:ring-4 focus:ring-teal-100 focus:border-teal-500 outline-none transition-all duration-200">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-600 mb-1">Nama Ibu</label>
@@ -87,7 +90,7 @@
                 
                 <div class="col-span-1 sm:col-span-2">
                     <label class="block text-sm font-semibold text-gray-600 mb-2">Posisi Pengukuran</label>
-                    <div class="flex gap-6 bg-gray-50 p-3 rounded-lg border" id="container_posisi">
+                    <div class="max-w-7xl mx-auto p-6 flex gap-6 bg-gray-50 p-3 rounded-lg border" id="container_posisi">
                         <label id="label_berdiri" class="flex items-center gap-2 cursor-pointer transition">
                             <input type="radio" name="posisi" id="posisi_berdiri" value="berdiri" checked class="w-4 h-4 text-puskesmas"> Berdiri
                         </label>
@@ -116,7 +119,7 @@
                 Memproses Model SVM...
             </div>
             
-            <div id="hasil-container" class="hidden flex-1 flex flex-col justify-between">
+            <div id="hasil-container" class="max-w-7xl mx-auto p-6 hidden flex-1 flex flex-col justify-between">
                 <div class="bg-teal-50 border-2 border-teal-200 rounded-xl p-6 text-center mb-6 shadow-inner">
                     <p class="text-sm text-gray-600 font-semibold mb-1">Status Gizi (BB/TB)</p>
                     <h1 id="hasil-svm" class="text-3xl font-black text-teal-700 uppercase tracking-tight">Normal</h1>
