@@ -301,12 +301,13 @@ def get_stats():
             
             if kia:
                 status = kia.kesimpulan_svm if kia.kesimpulan_svm else "Belum Diukur"
+                status_tbu_lower = kia.status_tbu.lower() if kia.status_tbu else ""
+                if 'pendek' in status_tbu_lower or 'stunting' in status_lower:
+                    stunting += 1
                 gizi_kategori[status] = gizi_kategori.get(status, 0) + 1
                 status_lower = status.lower()
                 if 'buruk' in status_lower or 'kurang' in status_lower:
                     gizi_buruk += 1
-                elif 'pendek' in status_lower or 'stunting' in status_lower:
-                    stunting += 1
                 elif 'baik' in status_lower or 'normal' in status_lower:
                     gizi_baik += 1
                 if a.latitude and a.longitude:
