@@ -107,6 +107,12 @@ export default function AdminPanel() {
 
   const handleEditPassword = async (id: number, namaUser: string) => {
   const newPassword = prompt(`Masukkan password baru untuk ${namaUser}:`);
+  if (newPassword === null) return; 
+  
+  if (newPassword.length < 6) {
+    alert("Password minimal 6 karakter!");
+    return;
+  }
   
   if (newPassword) {
     if (newPassword.length < 6) {
