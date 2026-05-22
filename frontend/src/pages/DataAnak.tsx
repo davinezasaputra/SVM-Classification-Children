@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import EditAnakModal from '../components/EditAnakModal';
 
 export default function DataAnak() {
   const [dataAnak, setDataAnak] = useState<any[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [anakToEdit, setAnakToEdit] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
@@ -87,6 +90,29 @@ export default function DataAnak() {
       toast.error('Terjadi kesalahan saat mencoba mengunduh file Excel.');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleEditConfirm = async (id: number, dataBaru: any) => {
+    try {
+      const response = await fetch(`/api/v1/anak/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(dataBaru)
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        toast.success('Data berhasil diperbarui.');
+        setIsEditModalOpen(false);
+        fetchData();
+      } else {
+        toast.error('Gagal memperbarui data.');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan sistem saat memperbarui data.');
     }
   };
 
@@ -181,6 +207,9 @@ export default function DataAnak() {
                             <Link to={`/kia/${anak.id}`} className="inline-block bg-teal-100 hover:bg-teal-200 text-teal-800 text-xs font-bold py-2 px-4 rounded-lg transition">
                               Buku KIA
                             </Link>
+                            <button onClick={() => { setAnakToEdit(anak); setIsEditModalOpen(true); }} className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg font-bold text-xs transition border border-indigo-200">
+                              Edit
+                            </button>
                             <button onClick={() => handleHapus(anak.id, anak.nama_anak)} className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold py-2 px-4 rounded-lg transition">
                               Hapus
                             </button>
@@ -198,6 +227,7 @@ export default function DataAnak() {
 
         </div>
       </main>
+      <EditAnakModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} anakData={anakToEdit} onConfirm={handleEditConfirm} />
     </div>
   );
 }

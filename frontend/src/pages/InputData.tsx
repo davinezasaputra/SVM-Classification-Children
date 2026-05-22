@@ -175,6 +175,11 @@ export default function InputData() {
       if (response.ok && result.status === 'success') {
         setHasilSVM(result);
         resetPengukuran();
+        if (result.is_outlier) {
+          toast.error("Data terdeteksi sebagai OUTLIER. Hasil SVM mungkin tidak akurat.");
+        } else {
+          toast.success("Klasifikasi berhasil! Lihat hasil SVM di sebelah kanan.");
+        }
       } else {
         toast.error(`Pesan Server: ${result.message}`);
       }

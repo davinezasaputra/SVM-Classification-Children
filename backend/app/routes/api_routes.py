@@ -69,13 +69,14 @@ def api_predict():
         z_bbu = kalkulasi_z_score(bb, umur_bulan, jk, 'bbu')
         z_tbu = kalkulasi_z_score(tb_terkalibrasi, umur_bulan, jk, 'tbu')
         z_bbtb = kalkulasi_z_score(bb, tb_terkalibrasi, jk, 'bbtb', umur=umur_bulan)
-
-        if check_outlier_data(z_bbu, z_tbu, z_bbtb):
-            return jsonify({
-                'status': 'warning',
-                'message': 'Data terdeteksi Outlier! Periksa kembali input Berat dan Tinggi Badan.',
-                'z_score': {'bbu': round(z_bbu, 2), 'tbu': round(z_tbu, 2), 'bbtb': round(z_bbtb, 2)}
-            }), 200
+        
+        is_outlier = check_outlier_data(z_bbu, z_tbu, z_bbtb)
+        if is_outlier:
+            status_bbu_SVM = "Outlier"
+            status_tbu_SVM = "Outlier"
+            status_bbtb_SVM = "Outlier"
+            prob_bbtb = 0
+            
         nik_balita = data.get('nik_balita')
         nama_ayah = data.get('nama_ayah')
         bb_lahir = float(data.get('bb_lahir')) if data.get('bb_lahir') else None
@@ -129,13 +130,14 @@ def api_predict():
 
         return jsonify({
             'status': 'success',
+            'is_outlier' : is_outlier,
             'hasil_indikator': {
                 'bbu': {'z': round(z_bbu, 2), 'status': status_bbu_SVM},
                 'tbu': {'z': round(z_tbu, 2), 'status': status_tbu_SVM},
                 'bbtb': {'z': round(z_bbtb, 2), 'status': status_bbtb_SVM}
             },
             'kesimpulan_svm': status_bbtb_SVM,
-            'confidence': f"{round(prob_bbtb, 2)}%"
+            'confidence': f"{round(prob_bbtb, 2)}%" if not is_outlier else "0%"
         }), 200
         
     except Exception as e:
@@ -151,9 +153,18 @@ def api_get_semua_anak():
         for anak in semua_anak:
             kia = PemantauanPerkembanganGiziAnak.query.filter_by(anak_id=anak.id).order_by(PemantauanPerkembanganGiziAnak.tanggal_ukur.desc()).first()
             hasil.append({
-                'id': anak.id, 'nik_balita': anak.nik_balita, 'nama_ibu': anak.nama_ibu, 'nama_ayah': anak.nama_ayah,
-                'nama_anak': anak.nama_anak, 'jk': 'Laki-laki' if anak.jk == 'L' else 'Perempuan',
-                'status_terakhir': kia.kesimpulan_svm if kia else 'Belum ada data'
+                'id': anak.id, 
+                'nik_balita': anak.nik_balita, 
+                'nama_ibu': anak.nama_ibu, 
+                'nama_ayah': anak.nama_ayah,
+                'nama_anak': anak.nama_anak, 
+                'jk': 'Laki-laki' if anak.jk == 'L' else 'Perempuan',
+                'status_terakhir': kia.kesimpulan_svm if kia else 'Belum ada data',
+                'bb': kia.bb if kia else '',
+                'tb': kia.tb if kia else '',
+                'posisi_ukur': kia.posisi_ukur if kia else 'berdiri',
+                'desa': anak.desa or '',
+                'tanggal_lahir': anak.tanggal_lahir.strftime('%Y-%m-%d') if anak.tanggal_lahir else ''
             })
         return jsonify({'status': 'success', 'data': hasil})
     except Exception as e:
@@ -169,6 +180,86 @@ def hapus_anak(id_anak):
     db.session.add(new_log)
     db.session.commit()
     return jsonify({'status': 'success', 'message': 'Data dihapus'})
+
+@api.route('/api/v1/anak/<int:id_anak>', methods=['PUT'])
+@login_required
+def edit_anak(id_anak):
+    data = request.get_json()
+    anak = Anak.query.get_or_404(id_anak)
+    
+    try:
+        if 'nama_anak' in data: anak.nama_anak = data['nama_anak']
+        if 'nama_ibu' in data: anak.nama_ibu = data['nama_ibu']
+        if 'nama_ayah' in data: anak.nama_ayah = data['nama_ayah']
+        if 'jk' in data: anak.jk = data['jk']
+        if 'desa' in data: anak.desa = data['desa']
+        if 'tanggal_lahir' in data and data['tanggal_lahir']:
+            anak.tanggal_lahir = datetime.strptime(data['tanggal_lahir'], '%Y-%m-%d').date()
+        kia = PemantauanPerkembanganGiziAnak.query.filter_by(anak_id=anak.id).order_by(PemantauanPerkembanganGiziAnak.tanggal_ukur.desc()).first()
+        
+        if kia and ('berat_badan' in data or 'tinggi_badan' in data or 'posisi_pengukuran' in data):
+            bb = float(data.get('berat_badan', kia.bb))
+            tb_input = float(data.get('tinggi_badan', kia.tb))
+            posisi = data.get('posisi_pengukuran', kia.posisi_ukur).lower()
+            tgl_lahir = anak.tanggal_lahir
+            tgl_ukur = kia.tanggal_ukur.date() if isinstance(kia.tanggal_ukur, datetime) else kia.tanggal_ukur
+            selisih_hari = (tgl_ukur - tgl_lahir).days
+            umur_bulan = selisih_hari / 30.4375
+            
+            if umur_bulan < 24:
+                posisi = 'telentang'
+                
+            tb_terkalibrasi = tb_input
+            if umur_bulan < 24 and posisi == 'berdiri': 
+                tb_terkalibrasi += 0.7
+            elif umur_bulan >= 24 and posisi in ['telentang', 'terlentang']: 
+                tb_terkalibrasi -= 0.7
+
+            jk_encoded = 1 if anak.jk == 'P' else 0
+            df_bbu = pd.DataFrame({'bb': [bb], 'usia': [umur_bulan], 'jk': [jk_encoded]})
+            df_tbu = pd.DataFrame({'tb_koreksi': [tb_terkalibrasi], 'usia': [umur_bulan], 'jk': [jk_encoded]})
+            df_bbtb = pd.DataFrame({'bb': [bb], 'tb_koreksi': [tb_terkalibrasi], 'jk': [jk_encoded]})
+            
+            z_bbu = kalkulasi_z_score(bb, umur_bulan, anak.jk, 'bbu')
+            z_tbu = kalkulasi_z_score(tb_terkalibrasi, umur_bulan, anak.jk, 'tbu')
+            z_bbtb = kalkulasi_z_score(bb, tb_terkalibrasi, anak.jk, 'bbtb', umur=umur_bulan)
+            
+            is_outlier = check_outlier_data(z_bbu, z_tbu, z_bbtb)
+            
+            if is_outlier:
+                status_bbu_SVM = "Outlier"
+                status_tbu_SVM = "Outlier"
+                status_bbtb_SVM = "Outlier"
+            else:
+                pred_bbu_idx = pipeline_bbu.predict(df_bbu)[0]
+                status_bbu_SVM = label_bbu.inverse_transform([pred_bbu_idx])[0]
+
+                pred_tbu_idx = pipeline_tbu.predict(df_tbu)[0]
+                status_tbu_SVM = label_tbu.inverse_transform([pred_tbu_idx])[0]
+
+                pred_bbtb_idx = pipeline_bbtb.predict(df_bbtb)[0]
+                status_bbtb_SVM = label_bbtb.inverse_transform([pred_bbtb_idx])[0]
+
+            # Update ke baris tabel database
+            kia.bb = bb
+            kia.tb = tb_input
+            kia.posisi_ukur = posisi
+            kia.z_bbu = z_bbu
+            kia.status_bbu = status_bbu_SVM
+            kia.z_tbu = z_tbu
+            kia.status_tbu = status_tbu_SVM
+            kia.z_bbtb = z_bbtb
+            kia.kesimpulan_svm = status_bbtb_SVM
+
+        message_log = f"Mengedit data profil & perbaikan nilai ukur anak: {anak.nama_anak} oleh {current_user.nama}"
+        db.session.add(LogAktivitas(user_id=current_user.id, aksi=message_log))
+        db.session.commit()
+        
+        return jsonify({'status': 'success', 'message': 'Profil dan data perbaikan gizi berhasil diperbarui!'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 400
 
 @api.route('/api/v1/search', methods=['GET'])
 @login_required

@@ -127,7 +127,8 @@ export default function AdminPanel() {
       
       if (response.ok && result.status === 'success') {
         toast.success(result.message);
-        setIsModalOpen(false); // Tutup modal jika sukses
+        setIsModalOpen(false);
+        fetchData();
       } else {
         toast.error(`Gagal: ${result.message}`);
       }
