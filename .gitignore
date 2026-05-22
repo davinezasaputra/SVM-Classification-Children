@@ -21,4 +21,3 @@ instance/
 
 # Abaikan file data pasien/laporan Excel agar tidak bocor ke publik
 *.xlsx
-*.csv
