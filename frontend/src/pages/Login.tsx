@@ -20,7 +20,6 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // SANGAT PENTING: Agar session cookie dari Flask-Login tersimpan di browser
         credentials: 'include', 
         body: JSON.stringify({ username, password }),
       });
@@ -28,13 +27,9 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok && data.status === 'success') {
-        // Simpan data user di localStorage (opsional, untuk nampilin nama di Navbar)
         localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Arahkan ke halaman Dashboard tanpa reload
         navigate('/dashboard');
       } else {
-        // Tampilkan pesan error dari backend
         setErrorMsg(data.message || 'Gagal login. Silakan coba lagi.');
       }
     } catch (error) {
@@ -48,8 +43,6 @@ export default function Login() {
   return (
     <div className="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans text-gray-800 animate-page">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        
-        {/* Header Section */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,15 +52,11 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-gray-900">Sistem Klasifikasi Gizi</h2>
           <p className="text-sm text-gray-500 mt-1">Puskesmas Simpang Teritip</p>
         </div>
-
-        {/* Error Alert */}
         {errorMsg && (
           <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium text-center">
             {errorMsg}
           </div>
         )}
-
-        {/* Form Section */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1.5">Username Petugas</label>

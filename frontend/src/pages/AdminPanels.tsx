@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -10,19 +10,12 @@ export default function AdminPanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  
-  // State form tambah petugas
   const [username, setUsername] = useState('');
   const [nama, setNama] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('kader'); // Default dari backend
+  const [role, setRole] = useState('kader');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const navigate = useNavigate();
-
-  
-
-  // Memanggil User dan Log secara bersamaan
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -54,7 +47,6 @@ export default function AdminPanel() {
     fetchData();
   }, [navigate]);
 
-  // Handle Tambah Akun
   const handleTambahUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !nama || !password) {
@@ -78,7 +70,7 @@ export default function AdminPanel() {
         setNama('');
         setPassword('');
         setRole('kader');
-        fetchData(); // Refresh data user & log
+        fetchData();
       } else {
         toast.error(`Gagal: ${result.message}`);
       }
@@ -89,7 +81,6 @@ export default function AdminPanel() {
     }
   };
 
-  // Handle Reset Password (bukan hapus)
   const handleResetPassword = async (id: number, namaUser: string) => {
     if (window.confirm(`Yakin ingin mereset password akun ${namaUser} menjadi bawaan pabrik (puskesmas123)?`)) {
       try {
@@ -101,7 +92,7 @@ export default function AdminPanel() {
         
         if (response.ok && result.status === 'success') {
           toast.success(result.message);
-          fetchData(); // Refresh log aktivitas
+          fetchData();
         } else {
           toast.error(`Gagal reset password: ${result.message}`);
         }
@@ -142,17 +133,11 @@ export default function AdminPanel() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-8 flex-1 space-y-8">
-        
-        {/* Header Admin */}
         <div>
           <h2 className="text-3xl font-black text-teal-800">Panel Administrator</h2>
           <p className="text-slate-500 mt-1">Manajemen akun petugas dan pemantauan log sistem.</p>
         </div>
-
-        {/* BARIS ATAS: Form Tambah & Tabel Akun */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Kolom Kiri: Form */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-100 h-full">
               <h3 className="text-xl font-bold text-slate-800 mb-6 border-b pb-4">Tambah Pengguna Baru</h3>
@@ -178,13 +163,11 @@ export default function AdminPanel() {
                 </div>
                 
                 <button type="submit" disabled={isSubmitting} className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition disabled:opacity-70 mt-2">
-                  {isSubmitting ? 'Menyimpan...' : '➕ Buat Akun'}
+                  {isSubmitting ? 'Menyimpan...' : 'Buat Akun'}
                 </button>
               </form>
             </div>
           </div>
-
-          {/* Kolom Kanan: Tabel Akun */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-100 h-full">
               <h3 className="text-xl font-bold text-slate-800 mb-6 border-b pb-4">Daftar Akun Terdaftar</h3>
@@ -229,10 +212,7 @@ export default function AdminPanel() {
               </div>
             </div>
           </div>
-
         </div>
-
-        {/* BARIS BAWAH: Log Aktivitas */}
         <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
           <h3 className="text-xl font-bold text-slate-800 mb-6 border-b pb-4">Riwayat Log Sistem (100 Terakhir)</h3>
           <div className="overflow-y-auto max-h-96 border border-slate-100 rounded-xl">

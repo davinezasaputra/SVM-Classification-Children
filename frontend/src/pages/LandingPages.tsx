@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Cek apakah petugas sudah login saat halaman dimuat
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (user) {
@@ -15,7 +13,6 @@ export default function LandingPage() {
 
   return (
     <div className="font-sans text-gray-800 antialiased bg-gray-50 scroll-smooth animate-page">
-      {/* --- NAVBAR --- */}
       <nav className="fixed w-full z-50 bg-white/95 backdrop-blur-sm shadow-md transition-all duration-300 py-3 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <a href="#home" className="flex items-center gap-3">
@@ -44,8 +41,6 @@ export default function LandingPage() {
             <a href="#visi-misi" className="text-gray-600 font-medium hover:text-[#1e3c72] transition">Visi Misi</a>
             <a href="#wilayah" className="text-gray-600 font-medium hover:text-[#1e3c72] transition">Wilayah Kerja</a>
             <a href="#struktur" className="text-gray-600 font-medium hover:text-[#1e3c72] transition">Struktur</a>
-            
-            {/* Tombol Navbar Dinamis Berdasarkan Status Login */}
             {isLoggedIn ? (
               <Link to="/dashboard" className="bg-[#1e3c72] hover:bg-[#2a5298] text-white px-6 py-2 rounded-full font-semibold shadow-lg transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5">
                 <i className="fa-solid fa-gauge"></i> Ke Dashboard
@@ -57,16 +52,12 @@ export default function LandingPage() {
             )}
           </div>
         </div>
-        
-        {/* Mobile Menu */}
         <div className={`${isMobileMenuOpen ? 'flex' : 'hidden'} lg:hidden mt-4 pb-4 flex-col gap-4 text-center`}>
           <a href="#home" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-medium hover:text-[#1e3c72] block">Home</a>
           <a href="#tentang" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-medium hover:text-[#1e3c72] block">Tentang</a>
           <a href="#visi-misi" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-medium hover:text-[#1e3c72] block">Visi Misi</a>
           <a href="#wilayah" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-medium hover:text-[#1e3c72] block">Wilayah Kerja</a>
           <a href="#struktur" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-medium hover:text-[#1e3c72] block">Struktur</a>
-          
-          {/* Tombol Mobile Dinamis */}
           {isLoggedIn ? (
             <Link to="/dashboard" className="bg-[#1e3c72] text-white mx-auto px-6 py-2 rounded-full font-semibold inline-block">Ke Dashboard</Link>
           ) : (
@@ -74,8 +65,6 @@ export default function LandingPage() {
           )}
         </div>
       </nav>
-
-      {/* --- HERO SECTION --- */}
       <section id="home" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80')" }}>
         <div className="absolute inset-0 bg-gradient-to-r from-[#1e3c72]/95 to-[#2a5298]/80"></div>
         
@@ -87,8 +76,6 @@ export default function LandingPage() {
               Implementasi Kecerdasan Buatan menggunakan Algoritma <strong className="text-white">Support Vector Machine (SVM)</strong> untuk memantau tumbuh kembang anak secara presisi di wilayah kerja Puskesmas Simpang Teritip.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              
-              {/* Tombol Hero Dinamis */}
               {isLoggedIn ? (
                 <Link to="/dashboard" className="bg-white text-[#1e3c72] hover:bg-gray-100 px-8 py-3 rounded-full font-bold text-lg shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex justify-center items-center gap-2">
                   <i className="fa-solid fa-gauge"></i> Ke Dashboard
@@ -114,8 +101,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* --- TENTANG SECTION --- */}
       <section id="tentang" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -148,8 +133,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* --- VISI MISI SECTION --- */}
       <section id="visi-misi" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex flex-col lg:flex-row items-center gap-16">
@@ -195,7 +178,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- WILAYAH KERJA SECTION --- */}
       <section id="wilayah" className="py-24 bg-white text-center">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="max-w-3xl mx-auto mb-16">
@@ -213,8 +195,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* --- STRUKTUR SECTION --- */}
       <section id="struktur" className="py-24 bg-gray-50 text-center">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="max-w-3xl mx-auto mb-16">
@@ -267,8 +247,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* --- FOOTER --- */}
       <footer className="bg-[#1e3c72] text-white pt-16 pb-8 border-t-[10px] border-[#2a5298]">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-white/20 pb-8 mb-8">

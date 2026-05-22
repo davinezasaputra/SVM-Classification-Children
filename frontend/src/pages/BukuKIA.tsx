@@ -4,9 +4,8 @@ import ReactApexChart from 'react-apexcharts';
 import Navbar from '../components/Navbar';
 
 export default function BukuKIA() {
-  const { id } = useParams(); // Mengambil ID dari URL
+  const { id } = useParams();
   const navigate = useNavigate();
-  
   const [anak, setAnak] = useState<any>(null);
   const [riwayat, setRiwayat] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,8 +34,6 @@ export default function BukuKIA() {
 
     fetchKIA();
   }, [id, navigate]);
-
-  // --- LOGIKA INSIGHT BERAT BADAN ---
   const renderInsight = () => {
     if (riwayat.length < 2) return null;
     
@@ -64,8 +61,6 @@ export default function BukuKIA() {
       );
     }
   };
-
-  // --- KONFIGURASI GRAFIK APEXCHARTS ---
   const chartOptions: any = {
     chart: { type: 'line', height: 350, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
     colors: ['#0d9488'],
@@ -90,7 +85,6 @@ export default function BukuKIA() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-8 flex-1">
-        {/* Navigasi Kembali */}
         <Link to="/data-anak" className="inline-flex items-center text-teal-600 hover:text-teal-800 font-semibold mb-6 transition">
           <span className="mr-2">←</span> Kembali ke Data Anak
         </Link>
@@ -103,8 +97,6 @@ export default function BukuKIA() {
           <div className="text-center py-20 bg-white rounded-3xl shadow-md">Data anak tidak ditemukan.</div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            
-            {/* KOLOM KIRI: Profil & Insight */}
             <div className="xl:col-span-1 space-y-6">
               <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-500 to-emerald-500"></div>
@@ -134,10 +126,7 @@ export default function BukuKIA() {
 
               {renderInsight()}
             </div>
-
-            {/* KOLOM KANAN: Grafik & Tabel Riwayat */}
             <div className="xl:col-span-2 space-y-8">
-              {/* Grafik Pertumbuhan */}
               <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100">
                 <h3 className="text-lg font-bold text-slate-800 mb-6">Grafik Pertumbuhan Berat Badan</h3>
                 {riwayat.length > 0 ? (
@@ -150,8 +139,6 @@ export default function BukuKIA() {
                   </div>
                 )}
               </div>
-
-              {/* Tabel Riwayat */}
               <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100">
                 <h3 className="text-lg font-bold text-slate-800 mb-6">Riwayat Pengukuran</h3>
                 <div className="overflow-x-auto">

@@ -1,42 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 
 export default function InputData() {
-  // --- STATE FORM UTAMA ---
   const [nikBalita, setNikBalita] = useState('');
   const [namaBalita, setNamaBalita] = useState('');
   const [tglLahir, setTglLahir] = useState('');
   const [jk, setJk] = useState('L');
-
-  // --- STATE ORANG TUA & LOKASI ---
   const [namaIbu, setNamaIbu] = useState('');
   const [namaAyah, setNamaAyah] = useState('');
   const [desa, setDesa] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-
-  // --- STATE KELAHIRAN ---
   const [bbLahir, setBbLahir] = useState('');
   const [tbLahir, setTbLahir] = useState('');
-
-  // --- STATE PENGUKURAN SAAT INI (TIDAK OTOMATIS TERISI) ---
   const [beratBadan, setBeratBadan] = useState('');
   const [tinggiBadan, setTinggiBadan] = useState('');
   const [posisi, setPosisi] = useState('berdiri');
   const [ntob, setNtob] = useState('B');
   const [imunisasi, setImunisasi] = useState('Tidak');
   const [vitA, setVitA] = useState('Tidak');
-
-  // --- STATE LOGIKA & UI ---
   const [isDataBaru, setIsDataBaru] = useState(false);
   const [infoUmur, setInfoUmur] = useState('');
   const [kunciPosisi, setKunciPosisi] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasilSVM, setHasilSVM] = useState<any>(null);
   const [antrianOffline, setAntrianOffline] = useState<any[]>([]);
-
-  // 1. Fungsi Cek Data ke Database (Bisa via NIK atau Nama)
   const cekDataDatabase = async (tipePencarian: 'nik' | 'nama', nilai: string) => {
     if (!nilai) return;
     
@@ -45,7 +34,6 @@ export default function InputData() {
       const data = await response.json();
       
       if (data.exists) {
-        // JIKA DATA DITEMUKAN: Isi semua identitas
         setIsDataBaru(false);
         if (tipePencarian === 'nama') setNikBalita(data.balita.nik_balita || '');
         if (tipePencarian === 'nik') setNamaBalita(data.balita.nama_balita || '');
@@ -64,7 +52,6 @@ export default function InputData() {
         if (data.balita.jk) setJk(data.balita.jk);
         
       } else {
-        // JIKA NIK BARU TIDAK DITEMUKAN: Tampilkan form kosong untuk domisili & ortu
         if (tipePencarian === 'nik' && nilai.length >= 16) {
           setIsDataBaru(true);
           setNamaIbu('');
@@ -77,8 +64,6 @@ export default function InputData() {
       console.error("Gagal cek data:", err);
     }
   };
-
-  // Handler saat NIK diketik (Langsung cek jika 16 digit)
   const handleCekNIK = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setNikBalita(val);
@@ -89,15 +74,13 @@ export default function InputData() {
     }
   };
 
-  // Handler saat selesai mengetik Nama (onBlur) untuk mencegah spam backend
   const handleCekNamaBlur = () => {
-    // Cek berdasarkan nama hanya jika NIK belum diisi penuh dan nama minimal 3 huruf
     if (namaBalita.length > 2 && nikBalita.length < 16) {
       cekDataDatabase('nama', namaBalita);
     }
   };
 
-  // 2. Hitung Umur & Kunci Posisi Ukur
+
   const handleTanggalLahir = (val: string) => {
     setTglLahir(val);
     if (!val) {
@@ -122,8 +105,6 @@ export default function InputData() {
       setPosisi('berdiri');
     }
   };
-
-  // 3. Submit Data ke AI / Offline
   const submitKlasifikasi = async () => {
     if (!nikBalita || !namaBalita || !tglLahir || !beratBadan || !tinggiBadan) {
       toast.error("Mohon lengkapi data NIK, Nama, Tanggal Lahir, serta Pengukuran BB & TB!");
@@ -212,7 +193,7 @@ export default function InputData() {
         {antrianOffline.length > 0 && (
           <div className="bg-orange-100 border border-orange-200 rounded-3xl shadow-md p-6 mb-8 flex justify-between items-center animate-pulse">
             <div>
-              <h2 className="text-xl font-black text-orange-700">⚠️ Terdapat Data Offline</h2>
+              <h2 className="text-xl font-black text-orange-700">Terdapat Data Offline</h2>
               <p className="text-orange-600 mt-1">Ada <span className="font-black">{antrianOffline.length}</span> data yang belum sinkron.</p>
             </div>
           </div>
@@ -226,12 +207,12 @@ export default function InputData() {
                 <h2 className="text-3xl font-black text-slate-800">Form Data Anak</h2>
                 <p className="text-slate-500 mt-2">Pencatatan KIA Posyandu & Klasifikasi Gizi SVM.</p>
               </div>
-              <div className="hidden md:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white items-center justify-center text-3xl shadow-xl">🧒</div>
+              <div className="hidden md:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white items-center justify-center text-3xl shadow-xl"></div>
             </div>
 
             <div className="space-y-8">
               
-              {/* --- BAGIAN 1: IDENTITAS BALITA --- */}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                 <h3 className="md:col-span-2 text-lg font-bold text-teal-800 flex items-center gap-2">
                   <span className="bg-teal-200 text-teal-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
@@ -243,7 +224,7 @@ export default function InputData() {
                     type="text" 
                     value={namaBalita} 
                     onChange={(e) => setNamaBalita(e.target.value)} 
-                    onBlur={handleCekNamaBlur} // Akan mengecek database saat kursor pindah
+                    onBlur={handleCekNamaBlur} 
                     placeholder="Ketik Nama Balita lalu klik di luar kotak..." 
                     className="w-full rounded-xl border p-3 outline-none focus:border-teal-500 bg-white" 
                   />
@@ -271,17 +252,14 @@ export default function InputData() {
                   {infoUmur && <p className="mt-2 text-xs font-semibold text-teal-700">{infoUmur}</p>}
                 </div>
               </div>
-
-              {/* --- BAGIAN 2: DATA ORANG TUA & KELAHIRAN --- */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                 <h3 className="md:col-span-2 text-lg font-bold text-teal-800 flex items-center gap-2">
                   <span className="bg-teal-200 text-teal-800 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> 
                   Riwayat Orang Tua & Kelahiran
                 </h3>
-                
                 {isDataBaru && (
                   <div className="md:col-span-2 bg-blue-50 border border-blue-200 rounded-xl p-4 mb-2">
-                    <p className="text-blue-700 font-semibold text-sm">📍 Data Baru Terdeteksi. Silakan lengkapi domisili.</p>
+                    <p className="text-blue-700 font-semibold text-sm">Data Baru Terdeteksi. Silakan lengkapi domisili.</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
                       <input type="text" placeholder="Nama Desa" value={desa} onChange={(e) => setDesa(e.target.value)} className="w-full rounded-lg border p-2 outline-none focus:border-teal-500 bg-white text-sm" />
                       <input type="text" placeholder="Latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} className="w-full rounded-lg border p-2 outline-none focus:border-teal-500 bg-white text-sm" />
@@ -307,8 +285,6 @@ export default function InputData() {
                   <input type="number" step="0.01" value={tbLahir} onChange={(e) => setTbLahir(e.target.value)} placeholder="Misal: 50" className="w-full rounded-xl border p-3 outline-none focus:border-teal-500 bg-white" />
                 </div>
               </div>
-
-              {/* --- BAGIAN 3: PENGUKURAN SAAT INI --- */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
                 <h3 className="md:col-span-3 text-lg font-bold text-emerald-800 flex items-center gap-2">
                   <span className="bg-emerald-200 text-emerald-900 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> 
@@ -365,18 +341,16 @@ export default function InputData() {
             </div>
 
             <button onClick={submitKlasifikasi} disabled={loading} className="mt-10 w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:scale-[1.01] transition-all duration-300 text-white font-black py-5 rounded-2xl shadow-xl text-lg disabled:opacity-50">
-              {loading ? 'MEMPROSES...' : '🚀 SIMPAN & KLASIFIKASI AI'}
+              {loading ? 'MEMPROSES...' : 'SIMPAN & KLASIFIKASI'}
             </button>
           </div>
-
-          {/* KOLOM KANAN: HASIL AI AREA */}
           <div className="bg-white rounded-[30px] shadow-xl p-8 border border-white h-fit sticky top-28">
             <p className="text-xs font-black tracking-[0.2em] text-slate-400 uppercase">Hasil AI</p>
             <h2 className="text-2xl font-black text-slate-800 mt-1 mb-6">Kesimpulan Gizi</h2>
 
             {!hasilSVM && !loading && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="text-6xl mb-4">💡</div>
+                <div className="w-16 h-16 mb-4 rounded-full bg-slate-100 mx-auto"></div>
                 <h3 className="font-bold text-slate-700 text-lg">Belum Ada Data</h3>
                 <p className="text-slate-400 mt-2 text-sm">Hasil klasifikasi Z-Score akan muncul di sini.</p>
               </div>

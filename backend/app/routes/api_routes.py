@@ -294,18 +294,14 @@ def get_stats():
         gizi_baik = 0
         
         map_data = []
-        gizi_kategori = {} # Menyimpan jumlah tiap kategori gizi untuk Pie Chart
+        gizi_kategori = {}
         
         for a in semua_anak:
-            # Ambil hanya pengukuran (PemantauanPerkembanganGiziAnak) paling terakhir/terbaru untuk anak ini
             kia = PemantauanPerkembanganGiziAnak.query.filter_by(anak_id=a.id).order_by(PemantauanPerkembanganGiziAnak.tanggal_ukur.desc()).first()
             
             if kia:
-                # A. Kumpulkan data untuk Pie Chart
                 status = kia.kesimpulan_svm if kia.kesimpulan_svm else "Belum Diukur"
                 gizi_kategori[status] = gizi_kategori.get(status, 0) + 1
-                
-                # B. Hitung untuk 4 Kartu Angka di Dashboard Atas
                 status_lower = status.lower()
                 if 'buruk' in status_lower or 'kurang' in status_lower:
                     gizi_buruk += 1
@@ -313,8 +309,6 @@ def get_stats():
                     stunting += 1
                 elif 'baik' in status_lower or 'normal' in status_lower:
                     gizi_baik += 1
-                
-                # C. Kumpulkan titik koordinat untuk Peta Sebaran
                 if a.latitude and a.longitude:
                     map_data.append({
                         'lat': a.latitude, 
@@ -375,7 +369,6 @@ def cek_balita():
 @login_required
 def export_excel():
     try:
-        # Tarik seluruh riwayat pengukuran (PemantauanPerkembanganGiziAnak) beserta data Anak-nya
         semua_catatan = db.session.query(PemantauanPerkembanganGiziAnak, Anak).join(Anak).order_by(PemantauanPerkembanganGiziAnak.tanggal_ukur.desc()).all()
         
         data_excel = []
@@ -383,19 +376,13 @@ def export_excel():
         no = 1
         
         for catatan, anak in semua_catatan:
-            # 1. Hitung format usia (Tahun, Bulan, Hari) presisi tinggi
             tgl_ukur = catatan.tanggal_ukur.date()
             tgl_lahir = anak.tanggal_lahir
             selisih = relativedelta(tgl_ukur, tgl_lahir)
-            
             usia_format = f"{selisih.years} tahun {selisih.months} bulan {selisih.days} hari"
-            
-            # 2. Cek untuk Alert Toleransi (Total Bulan)
             total_bulan = (selisih.years * 12) + selisih.months
             if 60 < total_bulan <= 70:
                 ada_alert_toleransi = True
-            
-            # 3. Format Baris Excel sesuai header yang kamu minta
             data_excel.append({
                'No': no,
                 'NIK Balita': anak.nik_balita,
@@ -426,29 +413,19 @@ def export_excel():
             no += 1
 
         df = pd.DataFrame(data_excel)
-        
-        # Simpan ke memori (tidak membuat file fisik di laptop)
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name='Data Pengukuran Balita')
-            
-            # Merapikan lebar kolom otomatis
             worksheet = writer.sheets['Data Pengukuran Balita']
             for i, col in enumerate(df.columns):
                 column_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
                 worksheet.set_column(i, i, column_len)
 
         output.seek(0)
-        
-        # Kembalikan file Excel sebagai response
         response = make_response(send_file(output, as_attachment=True, download_name=f"Data_Export_SVM_{date.today()}.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
-        
-        # Sisipkan custom header untuk memicu alert di JavaScript
         if ada_alert_toleransi:
             response.headers['X-Alert-Usia-Toleransi'] = 'true'
             response.headers['Access-Control-Expose-Headers'] = 'X-Alert-Usia-Toleransi'
-            
-        # Catat aktivitas ke log admin
         message_log = "Mengunduh (Export) seluruh data riwayat pengukuran balita ke Excel."
         db.session.add(LogAktivitas(user_id=current_user.id, aksi=message_log))
         db.session.commit()
