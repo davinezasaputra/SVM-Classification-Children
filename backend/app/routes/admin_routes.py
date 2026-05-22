@@ -85,3 +85,21 @@ def reset_password(id_user):
         'status': 'success', 
         'message': f'Password {target_user.nama} direset menjadi: {password_baru}'
     }), 200
+    
+@admin.route('/users/edit-password/<int:id_user>', methods=['POST'])
+@login_required
+@admin_required
+def edit_password(id_user):
+    data = request.get_json()
+    password_baru = data.get('password')
+    
+    if not password_baru or len(password_baru) < 6:
+        return jsonify({'status': 'error', 'message': 'Password minimal 6 karakter!'}), 400
+        
+    target_user = User.query.get_or_404(id_user)
+    target_user.password = generate_password_hash(password_baru)
+    
+    catat_log(f"Mengubah password manual untuk: {target_user.username}")
+    db.session.commit()
+    
+    return jsonify({'status': 'success', 'message': f'Password {target_user.nama} berhasil diperbarui.'}), 200

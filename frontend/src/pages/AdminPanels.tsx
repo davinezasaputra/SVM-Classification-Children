@@ -105,6 +105,35 @@ export default function AdminPanel() {
     }
   };
 
+  const handleEditPassword = async (id: number, namaUser: string) => {
+  const newPassword = prompt(`Masukkan password baru untuk ${namaUser}:`);
+  
+  if (newPassword) {
+    if (newPassword.length < 6) {
+      alert("Password minimal 6 karakter!");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/admin/users/edit-password/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password: newPassword })
+      });
+      const result = await response.json();
+      
+      if (response.ok && result.status === 'success') {
+        alert(result.message);
+      } else {
+        alert(`Gagal: ${result.message}`);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan sistem.");
+    }
+  }
+};
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 animate-page">
       <Navbar />
@@ -182,6 +211,9 @@ export default function AdminPanel() {
                             </span>
                           </td>
                           <td className="py-4 px-4 text-center">
+                            <button onClick={() => handleEditPassword(u.id, u.nama)} className="bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-teal-200">
+                              Edit Sandi
+                            </button>
                             <button onClick={() => handleResetPassword(u.id, u.nama)} className="bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-bold py-2 px-4 rounded-lg transition border border-orange-200">
                               Reset Sandi
                             </button>
