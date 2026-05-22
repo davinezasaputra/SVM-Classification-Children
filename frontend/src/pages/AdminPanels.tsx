@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import EditPasswordModal from '../components/EditPasswordModal';
 
 export default function AdminPanel() {
   const [users, setUsers] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   
   // State form tambah petugas
   const [username, setUsername] = useState('');
@@ -16,6 +19,8 @@ export default function AdminPanel() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const navigate = useNavigate();
+
+  
 
   // Memanggil User dan Log secara bersamaan
   const fetchData = async () => {
@@ -105,41 +110,31 @@ export default function AdminPanel() {
       }
     }
   };
-
-  const handleEditPassword = async (id: number, namaUser: string) => {
-  const newPassword = prompt(`Masukkan password baru untuk ${namaUser}:`);
-  if (newPassword === null) return; 
-  
-  if (newPassword.length < 6) {
-    toast.error("Password minimal 6 karakter!");
-    return;
-  }
-  
-  if (newPassword) {
-    if (newPassword.length < 6) {
-      toast.error("Password minimal 6 karakter!");
-      return;
-    }
-
+  const triggerEditPassword = (u: any) => {
+  setSelectedUser(u);
+  setIsModalOpen(true);
+};
+  const handleEditPasswordConfirm = async (password: string) => {
     try {
-      const response = await fetch(`/api/v1/admin/users/edit-password/${id}`, {
+      const response = await fetch(`/api/v1/admin/users/edit-password/${selectedUser.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ password: newPassword })
+        body: JSON.stringify({ password })
       });
+      
       const result = await response.json();
       
       if (response.ok && result.status === 'success') {
         toast.success(result.message);
+        setIsModalOpen(false); // Tutup modal jika sukses
       } else {
         toast.error(`Gagal: ${result.message}`);
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan sistem.");
+      toast.error("Terjadi kesalahan sistem saat mengubah password.");
     }
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 animate-page">
@@ -218,7 +213,7 @@ export default function AdminPanel() {
                             </span>
                           </td>
                           <td className="py-4 px-4 text-center">
-                            <button onClick={() => handleEditPassword(u.id, u.nama)} className="bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-teal-200">
+                            <button onClick={() => triggerEditPassword(u)} className="bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-teal-200">
                               Edit Sandi
                             </button>
                             <button onClick={() => handleResetPassword(u.id, u.nama)} className="bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-bold py-2 px-4 rounded-lg transition border border-orange-200">
@@ -268,6 +263,12 @@ export default function AdminPanel() {
         </div>
 
       </main>
+      <EditPasswordModal 
+  isOpen={isModalOpen} 
+  onClose={() => setIsModalOpen(false)}
+  namaUser={selectedUser?.nama || "Pengguna"}
+  onConfirm={handleEditPasswordConfirm}
+/>
     </div>
   );
 }
