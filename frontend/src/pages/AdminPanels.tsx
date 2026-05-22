@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -26,7 +27,7 @@ export default function AdminPanel() {
       ]);
 
       if (resUsers.status === 403 || resUsers.status === 401) {
-        alert('Akses ditolak! Khusus Administrator.');
+        toast.error('Akses ditolak! Khusus Administrator.');
         navigate('/dashboard');
         return;
       }
@@ -52,7 +53,7 @@ export default function AdminPanel() {
   const handleTambahUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !nama || !password) {
-      alert("Mohon lengkapi semua data!");
+      toast.error("Mohon lengkapi semua data!");
       return;
     }
 
@@ -67,17 +68,17 @@ export default function AdminPanel() {
       const result = await response.json();
       
       if (response.ok && result.status === 'success') {
-        alert(result.message);
+        toast.success(result.message);
         setUsername('');
         setNama('');
         setPassword('');
         setRole('kader');
         fetchData(); // Refresh data user & log
       } else {
-        alert(`Gagal: ${result.message}`);
+        toast.error(`Gagal: ${result.message}`);
       }
     } catch (error) {
-      alert("Terjadi kesalahan sistem saat menambah petugas.");
+      toast.error("Terjadi kesalahan sistem saat menambah petugas.");
     } finally {
       setIsSubmitting(false);
     }
@@ -94,13 +95,13 @@ export default function AdminPanel() {
         const result = await response.json();
         
         if (response.ok && result.status === 'success') {
-          alert(result.message);
+          toast.success(result.message);
           fetchData(); // Refresh log aktivitas
         } else {
-          alert(`Gagal reset password: ${result.message}`);
+          toast.error(`Gagal reset password: ${result.message}`);
         }
       } catch (error) {
-        alert("Terjadi kesalahan saat mereset password.");
+        toast.error("Terjadi kesalahan saat mereset password.");
       }
     }
   };
@@ -110,13 +111,13 @@ export default function AdminPanel() {
   if (newPassword === null) return; 
   
   if (newPassword.length < 6) {
-    alert("Password minimal 6 karakter!");
+    toast.error("Password minimal 6 karakter!");
     return;
   }
   
   if (newPassword) {
     if (newPassword.length < 6) {
-      alert("Password minimal 6 karakter!");
+      toast.error("Password minimal 6 karakter!");
       return;
     }
 
@@ -130,12 +131,12 @@ export default function AdminPanel() {
       const result = await response.json();
       
       if (response.ok && result.status === 'success') {
-        alert(result.message);
+        toast.success(result.message);
       } else {
-        alert(`Gagal: ${result.message}`);
+        toast.error(`Gagal: ${result.message}`);
       }
     } catch (error) {
-      alert("Terjadi kesalahan sistem.");
+      toast.error("Terjadi kesalahan sistem.");
     }
   }
 };

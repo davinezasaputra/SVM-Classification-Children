@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -25,6 +26,7 @@ export default function DataAnak() {
         setDataAnak(result.data);
       }
     } catch (error) {
+      toast.error('Error fetching data:');
       console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
@@ -49,13 +51,13 @@ export default function DataAnak() {
         });
         const result = await response.json();
         if (result.status === 'success') {
-          alert('Data berhasil dihapus.');
+          toast.success('Data berhasil dihapus.');
           fetchData(); 
         } else {
-          alert('Gagal menghapus data.');
+          toast.error('Gagal menghapus data.');
         }
       } catch (error) {
-        alert('Terjadi kesalahan sistem saat menghapus data.');
+        toast.error('Terjadi kesalahan sistem saat menghapus data.');
       }
     }
   };
@@ -67,7 +69,7 @@ export default function DataAnak() {
       if (!response.ok) throw new Error('Gagal mengunduh');
 
       if (response.headers.get('X-Alert-Usia-Toleransi') === 'true') {
-        alert("Peringatan: Terdapat balita dengan usia mendekati batas toleransi (60-70 bulan) di dalam data ini.");
+        toast.error("Peringatan: Terdapat balita dengan usia mendekati batas toleransi (60-70 bulan) di dalam data ini.");
       }
 
       const blob = await response.blob();
@@ -82,7 +84,7 @@ export default function DataAnak() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error(error);
-      alert('Terjadi kesalahan saat mencoba mengunduh file Excel.');
+      toast.error('Terjadi kesalahan saat mencoba mengunduh file Excel.');
     } finally {
       setIsExporting(false);
     }

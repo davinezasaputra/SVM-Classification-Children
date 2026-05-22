@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 
 export default function InputData() {
@@ -125,7 +126,7 @@ export default function InputData() {
   // 3. Submit Data ke AI / Offline
   const submitKlasifikasi = async () => {
     if (!nikBalita || !namaBalita || !tglLahir || !beratBadan || !tinggiBadan) {
-      alert("Mohon lengkapi data NIK, Nama, Tanggal Lahir, serta Pengukuran BB & TB!");
+      toast.error("Mohon lengkapi data NIK, Nama, Tanggal Lahir, serta Pengukuran BB & TB!");
       return;
     }
 
@@ -154,7 +155,7 @@ export default function InputData() {
       const antrianBaru = [...antrianOffline, payload];
       setAntrianOffline(antrianBaru);
       localStorage.setItem('antrianKIA', JSON.stringify(antrianBaru));
-      alert("Sinyal terputus! Data disimpan secara OFFLINE.");
+      toast.error("Sinyal terputus! Data disimpan secara OFFLINE.");
       resetPengukuran();
       return;
     }
@@ -175,10 +176,10 @@ export default function InputData() {
         setHasilSVM(result);
         resetPengukuran();
       } else {
-        alert(`Pesan Server: ${result.message}`);
+        toast.error(`Pesan Server: ${result.message}`);
       }
     } catch (error) {
-      alert("Terjadi kesalahan koneksi ke server AI.");
+      toast.error("Terjadi kesalahan koneksi ke server AI.");
     } finally {
       setLoading(false);
     }
