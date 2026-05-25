@@ -105,6 +105,15 @@ export default function InputData() {
       setPosisi('berdiri');
     }
   };
+  const simpanKeOffline = (payload: any) => {
+    const dataLama = JSON.parse(localStorage.getItem('antrianKIA') || '[]');
+    const antrianBaru = [...dataLama, payload];
+    
+    setAntrianOffline(antrianBaru);
+    localStorage.setItem('antrianKIA', JSON.stringify(antrianBaru));
+    toast.error("Koneksi ke server gagal/terputus! Data diamankan secara OFFLINE.");
+    resetPengukuran();
+  };
   const submitKlasifikasi = async () => {
     if (!nikBalita || !namaBalita || !tglLahir || !beratBadan || !tinggiBadan) {
       toast.error("Mohon lengkapi data NIK, Nama, Tanggal Lahir, serta Pengukuran BB & TB!");
@@ -133,11 +142,7 @@ export default function InputData() {
     };
 
     if (!navigator.onLine) {
-      const antrianBaru = [...antrianOffline, payload];
-      setAntrianOffline(antrianBaru);
-      localStorage.setItem('antrianKIA', JSON.stringify(antrianBaru));
-      toast.error("Sinyal terputus! Data disimpan secara OFFLINE.");
-      resetPengukuran();
+      simpanKeOffline(payload);
       return;
     }
 
@@ -151,6 +156,7 @@ export default function InputData() {
         credentials: 'include',
         body: JSON.stringify(payload)
       });
+      
       const result = await response.json();
       
       if (response.ok && result.status === 'success') {
@@ -165,7 +171,7 @@ export default function InputData() {
         toast.error(`Pesan Server: ${result.message}`);
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan koneksi ke server AI.");
+      simpanKeOffline(payload);
     } finally {
       setLoading(false);
     }
