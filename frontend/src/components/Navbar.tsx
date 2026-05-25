@@ -1,99 +1,136 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 export default function Navbar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [namaPetugas, setNamaPetugas] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setNamaPetugas(parsedUser.nama || parsedUser.username || '');
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
       await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
-      localStorage.removeItem('user');
+      localStorage.removeItem('user'); // Bersihkan data lokal
       navigate('/login');
     } catch (error) {
       console.error("Gagal logout:", error);
     }
   };
-  const navLinks = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Input Data', path: '/input-data' },
-    { name: 'Data Anak', path: '/data-anak' },
-    { name: 'Panel Admin', path: '/admin-panel' },
-  ];
+
+  // Fungsi penentu gaya CSS jika link sedang aktif (garis bawah putih)
+  const navLinkStyle = (path: string) => {
+    return location.pathname === path
+      ? "text-white relative after:absolute after:left-0 after:-bottom-2 after:w-full after:h-[2px] after:bg-white font-bold"
+      : "text-teal-100 hover:text-white transition font-semibold";
+  };
+
+  // 🟢 Fungsi penentu gaya CSS khusus dropdown mobile
+  const mobileLinkStyle = (path: string) => {
+    return location.pathname === path
+      ? "block px-4 py-3 bg-teal-800 text-white font-bold rounded-lg"
+      : "block px-4 py-3 text-teal-100 hover:bg-teal-700 hover:text-white transition rounded-lg";
+  };
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex-shrink-0 flex items-center">
-            <Link to="/dashboard" className="text-2xl font-black text-teal-700 tracking-tight">
-              Sistem<span className="text-emerald-500">Gizi</span>
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-teal-700 via-emerald-600 to-teal-700 shadow-2xl font-sans">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        
+        {/* Bagian Kiri: Logo & Menu */}
+        <div className="flex items-center gap-10">
+          
+          {/* Identitas Puskesmas */}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden shrink-0">
+              <img 
+                src="/Kabupaten-Bangka-Barat.png" 
+                alt="Logo Puskesmas"
+                className="w-10 h-10 object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="text-white font-black text-lg leading-none">Puskesmas Simpang Teritip</h1>
+              <p className="text-teal-100 text-xs tracking-wide mt-1 hidden sm:block">Sistem Monitoring &amp; Klasifikasi Gizi Balita</p>
+            </div>
+          </div>
+
+          {/* Menu Navigasi (DESKTOP) */}
+          <div className="hidden md:flex items-center gap-8 text-sm">
+            <Link to="/dashboard" className={navLinkStyle('/dashboard')}>
+              Dashboard
+            </Link>
+            <Link to="/input" className={navLinkStyle('/input')}>
+              Form Klasifikasi
+            </Link>
+            <Link to="/data-anak" className={navLinkStyle('/data-anak')}>
+              Data Anak
             </Link>
           </div>
-          <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 ${
-                  location.pathname === link.path
-                    ? 'bg-teal-50 text-teal-700 shadow-sm'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-teal-600'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <button
-              onClick={handleLogout}
-              className="ml-4 px-4 py-2 rounded-xl text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all"
-            >
-              Keluar
-            </button>
-          </div>
-          <div className="flex items-center md:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-teal-600 focus:outline-none transition-colors"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-          
+        </div>
+
+        {/* Bagian Kanan: Profil & Logout (DESKTOP) */}
+        <div className="hidden md:flex text-white text-sm font-medium items-center">
+          <span>Halo, Petugas {namaPetugas}</span>
+          <button 
+            onClick={handleLogout} 
+            className="ml-4 text-red-100 hover:text-white underline transition cursor-pointer"
+          >
+            Keluar
+          </button>
+        </div>
+
+        {/* 🟢 TOMBOL HAMBURGER MOBILE (Hanya muncul di HP) */}
+        <div className="flex items-center md:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-white focus:outline-none"
+          >
+            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* 🟢 DROPDOWN MENU MOBILE (Hanya muncul jika tombol hamburger diklik) */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 shadow-2xl absolute w-full left-0 z-50 animate-fade-in-down">
-          <div className="px-4 pt-2 pb-6 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-base font-bold transition-all ${
-                  location.pathname === link.path
-                    ? 'bg-teal-50 text-teal-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-teal-600'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+        <div className="md:hidden bg-teal-900 border-t border-teal-800 shadow-xl absolute w-full left-0 z-50 animate-fade-in-down">
+          <div className="px-4 py-4 space-y-2">
+            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className={mobileLinkStyle('/dashboard')}>
+              Dashboard
+            </Link>
+            <Link to="/input" onClick={() => setIsMobileMenuOpen(false)} className={mobileLinkStyle('/input')}>
+              Form Klasifikasi
+            </Link>
+            <Link to="/data-anak" onClick={() => setIsMobileMenuOpen(false)} className={mobileLinkStyle('/data-anak')}>
+              Data Anak
+            </Link>
+            
+            <div className="border-t border-teal-800 my-2 pt-2"></div>
+            
+            <div className="px-4 py-2 text-sm text-teal-200">
+              Login sebagai: <span className="font-bold text-white">{namaPetugas}</span>
+            </div>
+            
             <button
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 handleLogout();
               }}
-              className="w-full text-left block px-4 py-3 mt-4 rounded-xl text-base font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+              className="w-full text-left block px-4 py-3 rounded-lg text-base font-bold bg-red-600/20 text-red-100 hover:bg-red-500 hover:text-white transition-colors"
             >
-              Keluar
+              Keluar dari Sistem
             </button>
           </div>
         </div>
