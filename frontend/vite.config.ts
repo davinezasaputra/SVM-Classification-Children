@@ -1,15 +1,36 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api':{
-        target: 'http://localhost:5000',
-        changeOrigin: true,
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        navigateFallback: '/index.html' 
+      },
+      manifest: {
+        name: 'Sistem Klasifikasi Gizi Balita',
+        short_name: 'Gizi SVM',
+        description: 'Sistem pakar klasifikasi stunting menggunakan SVM',
+        theme_color: '#0d9488',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: '/favicon.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml'
+          },
+          {
+            src: '/Kabupaten-Bangka-Barat.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
       }
-    }
-  }
-})
+    })
+  ]
+});
