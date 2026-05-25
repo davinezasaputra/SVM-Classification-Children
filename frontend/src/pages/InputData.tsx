@@ -26,6 +26,7 @@ export default function InputData() {
   const [loading, setLoading] = useState(false);
   const [hasilSVM, setHasilSVM] = useState<any>(null);
   const [antrianOffline, setAntrianOffline] = useState<any[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
   const cekDataDatabase = async (tipePencarian: 'nik' | 'nama', nilai: string) => {
     if (!nilai) return;
     
@@ -177,6 +178,50 @@ export default function InputData() {
     }
   };
 
+  const sinkronisasiDataOffline = async () => {
+    if (!navigator.onLine) {
+      toast.error("Masih offline! Pastikan koneksi internet sudah stabil.");
+      return;
+    }
+
+    setIsSyncing(true);
+    const antrianSaatIni = [...antrianOffline];
+    let jumlahSukses = 0;
+    const sisaAntrian: any[] = [];
+
+    for (const payload of antrianSaatIni) {
+      try {
+        const response = await fetch('/api/v1/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.status === 'success') {
+          jumlahSukses++;
+        } else {
+          sisaAntrian.push(payload);
+        }
+      } catch (error) {
+        sisaAntrian.push(payload);
+      }
+    }
+    setAntrianOffline(sisaAntrian);
+    localStorage.setItem('antrianKIA', JSON.stringify(sisaAntrian));
+    setIsSyncing(false);
+
+    if (jumlahSukses > 0) {
+      toast.success(`${jumlahSukses} data berhasil disinkronisasi ke server!`);
+    }
+    
+    if (sisaAntrian.length > 0) {
+      toast.error(`${sisaAntrian.length} data gagal dikirim. Silakan coba lagi nanti.`);
+    }
+  };
+
   const resetPengukuran = () => {
     setBeratBadan('');
     setTinggiBadan('');
@@ -197,11 +242,18 @@ export default function InputData() {
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-8 flex-1">
         
         {antrianOffline.length > 0 && (
-          <div className="bg-orange-100 border border-orange-200 rounded-3xl shadow-md p-6 mb-8 flex justify-between items-center animate-pulse">
+          <div className="bg-orange-100 border border-orange-200 rounded-3xl shadow-md p-6 mb-8 flex flex-col md:flex-row justify-between items-center md:items-start gap-4 animate-pulse">
             <div>
-              <h2 className="text-xl font-black text-orange-700">Terdapat Data Offline</h2>
+              <h2 className="text-xl font-black text-orange-700">Peringatan: Terdapat Data Offline</h2>
               <p className="text-orange-600 mt-1">Ada <span className="font-black">{antrianOffline.length}</span> data yang belum sinkron.</p>
             </div>
+            <button 
+              onClick={sinkronisasiDataOffline}
+              disabled={isSyncing}
+              className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition disabled:opacity-50 w-full md:w-auto"
+            >
+              {isSyncing ? 'Menyinkronkan...' : 'Sinkronisasi Sekarang'}
+            </button>
           </div>
         )}
 
