@@ -152,12 +152,13 @@ export default function BukuKIA() {
                         <th className="py-3 px-4 font-bold">Z-Score BB/U</th>
                         <th className="py-3 px-4 font-bold">Z-Score TB/U</th>
                         <th className="py-3 px-4 font-bold">Z-Score BB/TB</th>
-                        <th className="py-3 px-4 font-bold rounded-r-xl">Status Gizi Klasifikasi</th>
+                        <th className="py-3 px-4 font-bold">Layanan Medis</th>
+                        <th className="py-3 px-4 font-bold rounded-r-xl">Status Gizi (SVM)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {riwayat.length === 0 ? (
-                        <tr><td colSpan={5} className="py-8 text-center text-slate-400">Belum ada data</td></tr>
+                        <tr><td colSpan={9} className="py-8 text-center text-slate-400">Belum ada data</td></tr>
                       ) : (
                         riwayat.map((r, idx) => (
                           <tr key={r.id || idx} className="hover:bg-slate-50">
@@ -174,6 +175,7 @@ export default function BukuKIA() {
                                 <span className="font-medium text-slate-700">{r.status_tbu || '-'}</span>
                             </td>
                             <td className="py-4 px-4">{r.z_bbtb !== null ? r.z_bbtb.toFixed(2) : '-'}</td>
+                            <td className="py-4 px-4 text-xs font-medium text-slate-500">{r.layanan}</td>
                             <td className="py-4 px-4">
                               <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${r.kesimpulan_svm.toLowerCase().includes('buruk') || r.kesimpulan_svm.toLowerCase().includes('pendek')? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                               }`}>

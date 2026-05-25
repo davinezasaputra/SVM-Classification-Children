@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
+from collections import Counter
 import joblib
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -12,7 +13,6 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.svm import SVC
-from sklearn.model_selection import learning_curve
 from sklearn.metrics import classification_report, accuracy_score
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -30,10 +30,6 @@ def standardisasi_tb(row):
 df = pd.read_csv('data_bbtb.csv', encoding='utf-8')
 
 #ada tambahan print untuk doksi skripsi berikan komentar jika tidak diperlukan ~by davin
-
-
-
-
 # standarisasi data umur, jenis kelamin, dan tinggi badan
 
 df['tb_koreksi'] = df.apply(standardisasi_tb, axis=1)
@@ -58,7 +54,7 @@ df['jk'] = df['jk'].map({'L': 0, 'P': 1})
 # cleaning data
 df = df.dropna(subset=['BB/TB'])
 df_gizi_buruk = df[df['BB/TB'] == 'Gizi Buruk']
-df_gizi_buruk_cloned = pd.concat([df_gizi_buruk] * 5, ignore_index=True)
+df_gizi_buruk_cloned = pd.concat([df_gizi_buruk] * 10, ignore_index=True)
 df = pd.concat([df, df_gizi_buruk_cloned], ignore_index=True)
 
 
@@ -77,6 +73,56 @@ X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2,
 #print("Hasil preprocessing label:", kamus_label)
 #print("\n")
 
+print("--- Membuat Grafik Perbandingan SMOTE ---")
+counter_sebelum = Counter(y_train)
+# Mengurutkan kunci agar tampilannya rapi
+keys_sebelum = sorted(counter_sebelum.keys()) 
+label_nama_sebelum = le.inverse_transform(keys_sebelum)
+jumlah_sebelum = [counter_sebelum[k] for k in keys_sebelum]
+
+# 2. Menjalankan SMOTE sementara (khusus untuk mengambil angka grafiknya saja)
+smote_visual = SMOTE(random_state=42, k_neighbors=1)
+X_train_smote_viz, y_train_smote_viz = smote_visual.fit_resample(X_train, y_train)
+
+# 3. Menghitung jumlah data pada masing-masing kelas SETELAH SMOTE
+counter_setelah = Counter(y_train_smote_viz)
+keys_setelah = sorted(counter_setelah.keys())
+label_nama_setelah = le.inverse_transform(keys_setelah)
+jumlah_setelah = [counter_setelah[k] for k in keys_setelah]
+
+# ==========================================
+# 4. MENGGAMBAR GRAFIK BERSEBELAHAN
+# ==========================================
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Warna bar (bisa disesuaikan)
+warna_bar = sns.color_palette("viridis", len(label_nama_sebelum))
+
+# Grafik Kiri: SEBELUM SMOTE
+sns.barplot(x=label_nama_sebelum, y=jumlah_sebelum, ax=axes[0], palette=warna_bar)
+axes[0].set_title('Distribusi Data Training BB/TB (Sebelum SMOTE)', fontsize=14, fontweight='bold')
+axes[0].set_ylabel('Jumlah Data', fontsize=12)
+axes[0].set_xlabel('Kategori Status Gizi', fontsize=12)
+axes[0].tick_params(axis='x', rotation=15)
+# Menambahkan angka di atas bar
+for i, v in enumerate(jumlah_sebelum):
+    axes[0].text(i, v + 3, str(v), ha='center', va='bottom', fontweight='bold')
+
+# Grafik Kanan: SETELAH SMOTE
+sns.barplot(x=label_nama_setelah, y=jumlah_setelah, ax=axes[1], palette=warna_bar)
+axes[1].set_title('Distribusi Data Training BB/TB (Setelah SMOTE)', fontsize=14, fontweight='bold')
+axes[1].set_ylabel('Jumlah Data', fontsize=12)
+axes[1].set_xlabel('Kategori Status Gizi', fontsize=12)
+axes[1].tick_params(axis='x', rotation=15)
+# Menambahkan angka di atas bar
+for i, v in enumerate(jumlah_setelah):
+    axes[1].text(i, v + 3, str(v), ha='center', va='bottom', fontweight='bold')
+
+plt.tight_layout()
+plt.show()
+
+print("Grafik SMOTE berhasil ditampilkan!")
+
 print("--- Menjalankan SMOTE & Training Model via Pipeline (BB/U) ---")
 langkah_langkah = [
     ('smote', SMOTE(random_state=42, k_neighbors=1)),
@@ -84,11 +130,8 @@ langkah_langkah = [
     ('svm', SVC(kernel='rbf', C=10, gamma=1, probability=True, random_state=42))
 ]
 
-
-
 pipeline_bbtb = ImbPipeline(steps=langkah_langkah)
 pipeline_bbtb.fit(X_train, y_train)
-
 
 #print("Hasil Preprocessing: MinMax Scaler")
 # 1. Mengambil alat scaler dari dalam pipeline
@@ -167,53 +210,6 @@ patches = [mpatches.Patch(color=warna_hex[i], label=labels[i]) for i in range(le
 plt.figlegend(handles=patches, loc='lower center', ncol=6, borderaxespad=0.1)
 plt.tight_layout(rect=[0, 0.05, 1, 1]) 
 plt.show()
-
-# =====================================================================
-# VISUALISASI LEARNING CURVE
-# (Berguna untuk analisis Overfitting/Underfitting di Skripsi)
-# =====================================================================
-print("--- Membuat Visualisasi Learning Curve ---")
-
-# Menghitung skor training dan validasi dengan 5-fold Cross Validation
-train_sizes, train_scores, test_scores = learning_curve(
-    estimator=pipeline_bbtb,
-    X=X_train, 
-    y=y_train,
-    train_sizes=np.linspace(0.4, 1.0, 10), # Membagi data latih ke dalam 10 titik evaluasi
-    cv=5,                                  # 5-Fold Cross Validation
-    n_jobs=-1,                             # Gunakan seluruh core CPU agar lebih cepat
-    random_state=42
-)
-
-# Menghitung nilai rata-rata dan standar deviasi
-train_mean = np.mean(train_scores, axis=1)
-train_std = np.std(train_scores, axis=1)
-test_mean = np.mean(test_scores, axis=1)
-test_std = np.std(test_scores, axis=1)
-
-# Mulai Menggambar Plot
-plt.figure(figsize=(10, 6))
-
-# Plot Akurasi Training
-plt.plot(train_sizes, train_mean, color='#3498db', marker='o', 
-         markersize=5, label='Akurasi Training (Pelatihan)')
-plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, 
-                 alpha=0.15, color='#3498db')
-
-# Plot Akurasi Validasi (Cross-Validation)
-plt.plot(train_sizes, test_mean, color='#2ecc71', linestyle='--', marker='s', 
-         markersize=5, label='Akurasi Validasi (Pengujian)')
-plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, 
-                 alpha=0.15, color='#2ecc71')
-
-plt.title('Learning Curve - SVM Klasifikasi Gizi (BB/TB)')
-plt.xlabel('Jumlah Sampel Data Latih')
-plt.ylabel('Skor Akurasi')
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend(loc='lower right')
-plt.tight_layout()
-plt.show()
-print("Visualisasi Learning Curve selesai ditampilkan.\n")
 
 # # simpan model
 # paket_SVM = {'model_pipeline': pipeline_bbtb, 'label_encoder': le}

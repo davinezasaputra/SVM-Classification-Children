@@ -321,20 +321,25 @@ export default function InputData() {
                   </div>
                   {kunciPosisi && <p className="mt-2 text-xs font-semibold text-red-500">Balita {'< 24'} bulan wajib diukur telentang.</p>}
                 </div>
-
                 <div>
                   <label className="text-sm font-bold text-slate-700 block mb-2">Imunisasi</label>
-                  <select value={imunisasi} onChange={(e) => setImunisasi(e.target.value)} className="w-full rounded-xl border p-3 outline-none focus:border-emerald-500 border-emerald-300 bg-white">
-                    <option value="Tidak">Tidak</option>
-                    <option value="Ada">Ada</option>
-                  </select>
+                  <input 
+                    type="text" 
+                    value={imunisasi} 
+                    onChange={(e) => setImunisasi(e.target.value)} 
+                    placeholder="Contoh: Campak, DPT 1 (Isi 'Tidak' jika kosong)" 
+                    className="w-full rounded-xl border p-3 outline-none focus:border-emerald-500 border-emerald-300 bg-white" 
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-slate-700 block mb-2">Vitamin A</label>
-                  <select value={vitA} onChange={(e) => setVitA(e.target.value)} className="w-full rounded-xl border p-3 outline-none focus:border-emerald-500 border-emerald-300 bg-white">
-                    <option value="Tidak">Tidak</option>
-                    <option value="Lulus">Lulus</option>
-                  </select>
+                  <input 
+                    type="text" 
+                    value={vitA} 
+                    onChange={(e) => setVitA(e.target.value)} 
+                    placeholder="Contoh: Kapsul Merah (Isi 'Tidak' jika kosong)" 
+                    className="w-full rounded-xl border p-3 outline-none focus:border-emerald-500 border-emerald-300 bg-white" 
+                  />
                 </div>
               </div>
 
