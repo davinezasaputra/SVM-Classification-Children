@@ -48,7 +48,7 @@ export default function Login() {
               <img 
                 src="/Kabupaten-Bangka-Barat.png" 
                 alt="Logo Puskesmas"
-                className="w-10 h-10 object-contain"
+                className="w-15 h-15 object-contain"
               />
             </div>
           <h2 className="text-2xl font-bold text-gray-900">Sistem Klasifikasi Gizi</h2>
