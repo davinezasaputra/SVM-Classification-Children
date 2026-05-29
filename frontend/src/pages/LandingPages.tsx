@@ -21,8 +21,6 @@ export default function LandingPage() {
     { huruf: 'I', judul: 'Informatif', desc: 'Memberikan informasi yang akurat dan jelas untuk setiap layanan yang diberikan.' },
     { huruf: 'P', judul: 'Patient Safety Goal', desc: 'Menciptakan suasana dan lingkungan kerja yang aman dan nyaman dengan mengutamakan keselamatan Pelanggan.' },
   ];
-
-  // DATA SDM TRANSKRIPSI DARI GAMBAR
   const staffData = [
     { name: 'dr. Sahat L. Tobing', title: 'Dokter Umum (Medis)', icon: 'fa-user-doctor' },
     { name: 'Rindi Antika, S. Gz', title: 'Nutrisionis (Ahli Gizi)', icon: 'fa-wheat-awn' },
@@ -248,12 +246,10 @@ export default function LandingPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {tataNilai.map((item, index) => (
-              <div key={index} className={`bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group ${index === tataNilai.length - 1 ? 'xl:col-span-1 xl:col-start-2' : ''}`}>
-                {/* Watermark Huruf Besar */}
+              <div key={index} className={`bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group`}>
                 <div className="absolute -right-6 -bottom-6 text-[180px] font-black text-gray-50 group-hover:text-blue-50 transition-colors duration-500 pointer-events-none leading-none select-none z-0">
                   {item.huruf}
-                </div>
-                
+                </div> 
                 <div className="relative z-10">
                   <div className="w-14 h-14 bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white rounded-2xl flex items-center justify-center text-2xl font-black mb-6 shadow-md shadow-blue-900/20 group-hover:scale-110 transition-transform duration-300">
                     {item.huruf}
@@ -267,7 +263,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* STRUKTUR ORGANISASI SECTION */}
+      
       <section id="struktur" className="py-24 bg-white text-center border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="max-w-3xl mx-auto mb-16">
