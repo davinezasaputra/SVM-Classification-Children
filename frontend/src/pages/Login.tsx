@@ -46,7 +46,7 @@ export default function Login() {
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden shrink-0">
               <img 
-                src="/Kabupaten-Bangka-Barat.png" 
+                src="/Kabupaten-Bangka-Barat.pngg" 
                 alt="Logo Puskesmas"
                 className="w-10 h-10 object-contain"
               />
