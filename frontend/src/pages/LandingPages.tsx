@@ -397,7 +397,7 @@ export default function LandingPage() {
           
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-blue-200/60 font-medium">
             <p>&copy; {new Date().getFullYear()} Proyek Skripsi. All Rights Reserved.</p>
-            <p>Dikembangkan oleh <strong className="text-white">Davin</strong> - Teknik Informatika</p>
+            <p>Dikembangkan oleh <strong className="text-white">Davin</strong> - Teknologi Informasi</p>
           </div>
         </div>
       </footer>
