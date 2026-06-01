@@ -5,6 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import Swal from 'sweetalert2';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -67,14 +68,35 @@ export default function Dashboard() {
     fetchStats();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
-      localStorage.removeItem('user');
-      navigate('/login');
-    } catch (error) {
-      console.error("Gagal logout:", error);
-    }
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    Swal.fire({
+      title: 'Konfirmasi Logout',
+      text: "Apakah Anda yakin ingin keluar dari sistem?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#0f766e',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Ya, Keluar',
+      cancelButtonText: 'Batal',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-xl px-6 py-2',
+        cancelButton: 'rounded-xl px-6 py-2'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+          localStorage.removeItem('user');
+          navigate('/login');
+        } catch (error) {
+          console.error("Gagal logout:", error);
+          toast.error("Terjadi kesalahan saat logout");
+        }
+      }
+    });
   };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);

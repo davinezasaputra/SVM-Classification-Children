@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast/headless';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -6,6 +7,15 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  
+  useEffect(() => {
+    const logoutReason = localStorage.getItem('logout_reason');
+    if (logoutReason) {
+      toast.error(logoutReason);
+      localStorage.removeItem('logout_reason');
+    }
+  }, []);
   
   const navigate = useNavigate();
 

@@ -16,7 +16,7 @@ export default function App() {
       const response = await originalFetch(...args);
       if (response.status === 401 && window.location.pathname !== '/login') {
         localStorage.removeItem('user');
-        toast.error('Sesi Anda telah berakhir dari Server. Silakan login kembali.');
+        localStorage.setItem('logout_reason', 'Sesi Anda telah habis. Silakan login kembali.');
         window.location.href = '/login';
       }
       return response;
@@ -29,10 +29,10 @@ export default function App() {
       const user = localStorage.getItem('user');
       if (user && window.location.pathname !== '/login') {
         timeoutId = setTimeout(() => {
-          localStorage.removeItem('user');
-          toast.error('Anda dikeluarkan karena tidak ada aktivitas.');
-          window.location.href = '/login';
-        }, INACTIVITY_LIMIT);
+        localStorage.removeItem('user');
+        localStorage.setItem('logout_reason', 'Anda dikeluarkan otomatis karena tidak ada aktivitas.');
+        window.location.href = '/login';
+      }, INACTIVITY_LIMIT);
       }
     };
     const events = ['mousemove', 'mousedown', 'keypress', 'DOMMouseScroll', 'mousewheel', 'touchmove', 'MSPointerMove'];

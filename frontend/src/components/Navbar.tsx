@@ -1,5 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -15,14 +17,36 @@ export default function Navbar() {
     }
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
-      localStorage.removeItem('user'); // Bersihkan data lokal
-      navigate('/login');
-    } catch (error) {
-      console.error("Gagal logout:", error);
-    }
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    Swal.fire({
+      title: 'Konfirmasi Logout',
+      text: "Apakah Anda yakin ingin keluar dari sistem?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#0f766e', // Warna teal-700 (menyesuaikan tema Dashboard Anda)
+      cancelButtonColor: '#ef4444',  // Warna red-500
+      confirmButtonText: 'Ya, Keluar',
+      cancelButtonText: 'Batal',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-xl px-6 py-2',
+        cancelButton: 'rounded-xl px-6 py-2'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Lakukan proses pemutusan sesi dari server
+          await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+          localStorage.removeItem('user');
+          navigate('/login');
+        } catch (error) {
+          console.error("Gagal logout:", error);
+          toast.error("Terjadi kesalahan saat logout");
+        }
+      }
+    });
   };
 
   // Fungsi penentu gaya CSS jika link sedang aktif (garis bawah putih)
@@ -124,9 +148,9 @@ export default function Navbar() {
             </div>
             
             <button
-              onClick={() => {
+              onClick={(e) => {
                 setIsMobileMenuOpen(false);
-                handleLogout();
+                handleLogout(e as unknown as React.MouseEvent);
               }}
               className="w-full text-left block px-4 py-3 rounded-lg text-base font-bold bg-red-600/20 text-red-100 hover:bg-red-500 hover:text-white transition-colors"
             >
