@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPages';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -16,7 +16,7 @@ export default function App() {
       const response = await originalFetch(...args);
       if (response.status === 401 && window.location.pathname !== '/login') {
         localStorage.removeItem('user');
-        alert('Sesi Anda telah berakhir dari Server. Silakan login kembali.');
+        toast.error('Sesi Anda telah berakhir dari Server. Silakan login kembali.');
         window.location.href = '/login';
       }
       return response;
@@ -30,7 +30,7 @@ export default function App() {
       if (user && window.location.pathname !== '/login') {
         timeoutId = setTimeout(() => {
           localStorage.removeItem('user');
-          alert('Anda dikeluarkan karena tidak ada aktivitas.');
+          toast.error('Anda dikeluarkan karena tidak ada aktivitas.');
           window.location.href = '/login';
         }, INACTIVITY_LIMIT);
       }

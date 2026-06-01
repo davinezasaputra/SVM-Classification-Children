@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
@@ -57,6 +58,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error("Gagal mengambil statistik:", error);
+        toast.error("Gagal mengambil statistik");
       } finally {
         setIsLoading(false);
       }
