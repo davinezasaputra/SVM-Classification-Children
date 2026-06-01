@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash
 from app.models import User, Anak, PemantauanPerkembanganGiziAnak, OrangTua, LayananMedis
@@ -20,6 +20,7 @@ def login():
     u = User.query.filter_by(username=data['username']).first()
     if u and check_password_hash(u.password, data['password']):
         login_user(u)
+        session.permanent = True
         return jsonify({
             'status': 'success',
             'message': 'Login berhasil',

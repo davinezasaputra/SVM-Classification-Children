@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPages';
@@ -9,6 +10,20 @@ import BukuKIA from './pages/BukuKIA';
 import AdminPanel from './pages/AdminPanels';
 
 export default function App() {
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response.status === 401 && window.location.pathname !== '/login') {
+        localStorage.removeItem('user');
+        alert('Sesi Anda telah berakhir. Silakan login kembali.');
+        window.location.href = '/login';
+      }
+      
+      return response;
+    };
+  }, []);
   return (
     <Router>
       <Toaster 
