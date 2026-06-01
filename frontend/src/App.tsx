@@ -21,7 +21,7 @@ export default function App() {
       }
       return response;
     };
-    const INACTIVITY_LIMIT = 1 * 60 * 1000; 
+    const INACTIVITY_LIMIT = 24 * 60 * 60 * 1000; // 1 hari dalam milidetik
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const resetTimer = () => {
