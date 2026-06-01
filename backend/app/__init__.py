@@ -40,7 +40,14 @@ def create_app():
     
     @manage_login.user_loader
     def load_user(uid): 
-     return User.query.get(int(uid))
+        return User.query.get(int(uid))
+    
+    @manage_login.unauthorized_handler
+    def unauthorized():
+        from flask import request, jsonify, redirect, url_for
+        if request.path.startswith('/api/'):
+            return jsonify({'status': 'error', 'message': 'Sesi habis'}), 401
+        return redirect(url_for('web.login'))
     
     
     return app

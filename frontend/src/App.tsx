@@ -12,16 +12,35 @@ import AdminPanel from './pages/AdminPanels';
 export default function App() {
   useEffect(() => {
     const originalFetch = window.fetch;
-    
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
       if (response.status === 401 && window.location.pathname !== '/login') {
         localStorage.removeItem('user');
-        alert('Sesi Anda telah berakhir. Silakan login kembali.');
+        alert('Sesi Anda telah berakhir dari Server. Silakan login kembali.');
         window.location.href = '/login';
       }
-      
       return response;
+    };
+    const INACTIVITY_LIMIT = 1 * 60 * 1000; 
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      const user = localStorage.getItem('user');
+      if (user && window.location.pathname !== '/login') {
+        timeoutId = setTimeout(() => {
+          localStorage.removeItem('user');
+          alert('Anda dikeluarkan karena tidak ada aktivitas.');
+          window.location.href = '/login';
+        }, INACTIVITY_LIMIT);
+      }
+    };
+    const events = ['mousemove', 'mousedown', 'keypress', 'DOMMouseScroll', 'mousewheel', 'touchmove', 'MSPointerMove'];
+    events.forEach((event) => document.addEventListener(event, resetTimer, true));
+    resetTimer();
+    return () => {
+      events.forEach((event) => document.removeEventListener(event, resetTimer, true));
+      clearTimeout(timeoutId);
     };
   }, []);
   return (
