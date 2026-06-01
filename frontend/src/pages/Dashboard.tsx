@@ -85,7 +85,7 @@ export default function Dashboard() {
         confirmButton: 'rounded-xl px-6 py-2',
         cancelButton: 'rounded-xl px-6 py-2'
       }
-    }).then(async (result) => {
+    }).then(async (result: any) => {
       if (result.isConfirmed) {
         try {
           await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });

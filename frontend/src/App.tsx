@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPages';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';

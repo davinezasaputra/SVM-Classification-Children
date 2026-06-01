@@ -2,7 +2,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
-
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,7 +33,7 @@ export default function Navbar() {
         confirmButton: 'rounded-xl px-6 py-2',
         cancelButton: 'rounded-xl px-6 py-2'
       }
-    }).then(async (result) => {
+    }).then(async (result: any) => {
       if (result.isConfirmed) {
         try {
           // Lakukan proses pemutusan sesi dari server
