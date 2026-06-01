@@ -23,7 +23,7 @@ def create_app():
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:@localhost/db_puskesmas')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
     app.config['SESSION_REFRESH_EACH_REQUEST'] = True
     
     from app.models import db, User
