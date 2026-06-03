@@ -12,6 +12,7 @@ export default function AdminPanel() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   
   // Form States
+  const [editingUserId, setEditingUserId] = useState<number | null>(null); // State Mode Edit
   const [username, setUsername] = useState('');
   const [nama, setNama] = useState('');
   const [password, setPassword] = useState('');
@@ -43,14 +44,8 @@ export default function AdminPanel() {
       const dataUsers = await resUsers.json();
       const dataLogs = await resLogs.json();
 
-      if (dataUsers.status === 'success') {
-        setUsers(dataUsers.data);
-        setUserPage(1); // Reset ke halaman 1 saat data baru dimuat
-      }
-      if (dataLogs.status === 'success') {
-        setLogs(dataLogs.data);
-        setLogPage(1); // Reset ke halaman 1 saat data baru dimuat
-      }
+      if (dataUsers.status === 'success') setUsers(dataUsers.data);
+      if (dataLogs.status === 'success') setLogs(dataLogs.data);
 
     } catch (error) {
       console.error("Gagal mengambil data admin:", error);
@@ -63,18 +58,23 @@ export default function AdminPanel() {
     fetchData();
   }, [navigate]);
 
-  // Handle API Requests...
-  const handleTambahUser = async (e: React.FormEvent) => {
+  // FUNGSI GABUNGAN: TAMBAH & EDIT AKUN
+  const handleSubmitUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !nama || !password) {
-      toast.error("Mohon lengkapi semua data!");
+    
+    // Jika mode tambah, password wajib. Jika mode edit, password opsional.
+    if (!username || !nama || (!editingUserId && !password)) {
+      toast.error("Mohon lengkapi data yang wajib!");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/v1/admin/users', {
-        method: 'POST',
+      const url = editingUserId ? `/api/v1/admin/users/${editingUserId}` : '/api/v1/admin/users';
+      const method = editingUserId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ username, nama, password, role })
@@ -83,19 +83,35 @@ export default function AdminPanel() {
       
       if (response.ok && result.status === 'success') {
         toast.success(result.message);
-        setUsername('');
-        setNama('');
-        setPassword('');
-        setRole('kader');
+        handleCancelEdit(); // Kosongkan form kembali ke mode Tambah
         fetchData();
       } else {
         toast.error(`Gagal: ${result.message}`);
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan sistem saat menambah petugas.");
+      toast.error("Terjadi kesalahan sistem saat menyimpan data.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // TRIGGER MASUK KE MODE EDIT
+  const handleEditClick = (u: any) => {
+    setEditingUserId(u.id);
+    setNama(u.nama);
+    setUsername(u.username);
+    setRole(u.role);
+    setPassword(''); // Password dikosongkan agar tidak terubah jika tidak diisi
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll otomatis ke atas
+  };
+
+  // BATALKAN MODE EDIT
+  const handleCancelEdit = () => {
+    setEditingUserId(null);
+    setNama('');
+    setUsername('');
+    setPassword('');
+    setRole('kader');
   };
 
   const handleResetPassword = async (id: number, namaUser: string) => {
@@ -147,9 +163,8 @@ export default function AdminPanel() {
     }
   };
 
-  // Kalkulasi Pagination
-  const totalUserPages = Math.ceil(users.length / USERS_PER_PAGE);
-  const totalLogPages = Math.ceil(logs.length / LOGS_PER_PAGE);
+  const totalUserPages = Math.ceil(users.length / USERS_PER_PAGE) || 1;
+  const totalLogPages = Math.ceil(logs.length / LOGS_PER_PAGE) || 1;
 
   const currentUsers = users.slice((userPage - 1) * USERS_PER_PAGE, userPage * USERS_PER_PAGE);
   const currentLogs = logs.slice((logPage - 1) * LOGS_PER_PAGE, logPage * LOGS_PER_PAGE);
@@ -165,11 +180,19 @@ export default function AdminPanel() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Kolom Kiri: Form */}
+          {/* Kolom Kiri: Form MULTIFUNGSI (Tambah / Edit) */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-100 h-full">
-              <h3 className="text-xl font-bold text-slate-800 mb-6 border-b pb-4">Tambah Pengguna Baru</h3>
-              <form onSubmit={handleTambahUser} className="space-y-4">
+            <div className={`bg-white rounded-3xl shadow-xl p-8 border h-full transition-colors ${editingUserId ? 'border-blue-300 ring-4 ring-blue-50' : 'border-slate-100'}`}>
+              <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <h3 className={`text-xl font-bold ${editingUserId ? 'text-blue-700' : 'text-slate-800'}`}>
+                  {editingUserId ? 'Edit Data Pengguna' : 'Tambah Pengguna Baru'}
+                </h3>
+                {editingUserId && (
+                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">Mode Edit</span>
+                )}
+              </div>
+              
+              <form onSubmit={handleSubmitUser} className="space-y-4">
                 <div>
                   <label className="text-sm font-bold text-slate-600 block mb-2">Nama Lengkap</label>
                   <input type="text" value={nama} onChange={(e) => setNama(e.target.value)} placeholder="Contoh: Bidan Siti" className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 outline-none focus:border-teal-500 focus:bg-white transition" />
@@ -179,8 +202,10 @@ export default function AdminPanel() {
                   <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Untuk login aplikasi" className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 outline-none focus:border-teal-500 focus:bg-white transition" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-slate-600 block mb-2">Password Awal</label>
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimal 6 karakter" className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 outline-none focus:border-teal-500 focus:bg-white transition" />
+                  <label className="text-sm font-bold text-slate-600 block mb-2">
+                    {editingUserId ? 'Ubah Sandi (Opsional)' : 'Password Awal'}
+                  </label>
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={editingUserId ? "Kosongkan jika tidak diubah" : "Minimal 6 karakter"} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 outline-none focus:border-teal-500 focus:bg-white transition" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-slate-600 block mb-2">Hak Akses (Role)</label>
@@ -190,9 +215,16 @@ export default function AdminPanel() {
                   </select>
                 </div>
                 
-                <button type="submit" disabled={isSubmitting} className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition disabled:opacity-70 mt-2">
-                  {isSubmitting ? 'Menyimpan...' : 'Buat Akun'}
-                </button>
+                <div className="flex gap-2 pt-2">
+                  <button type="submit" disabled={isSubmitting} className={`flex-1 text-white font-bold py-3 px-4 rounded-xl shadow-md transition disabled:opacity-70 ${editingUserId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-teal-600 hover:bg-teal-700'}`}>
+                    {isSubmitting ? 'Memproses...' : (editingUserId ? 'Simpan Perubahan' : 'Buat Akun')}
+                  </button>
+                  {editingUserId && (
+                    <button type="button" onClick={handleCancelEdit} className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl transition">
+                      Batal
+                    </button>
+                  )}
+                </div>
               </form>
             </div>
           </div>
@@ -218,7 +250,7 @@ export default function AdminPanel() {
                       <tr><td colSpan={4} className="py-8 text-center text-slate-400">Belum ada akun.</td></tr>
                     ) : (
                       currentUsers.map((u) => (
-                        <tr key={u.id} className="hover:bg-slate-50 transition">
+                        <tr key={u.id} className={`transition ${editingUserId === u.id ? 'bg-blue-50' : 'hover:bg-slate-50'}`}>
                           <td className="py-4 px-4 font-bold text-slate-800">{u.nama}</td>
                           <td className="py-4 px-4 font-mono text-slate-600">{u.username}</td>
                           <td className="py-4 px-4">
@@ -226,12 +258,16 @@ export default function AdminPanel() {
                               {u.role.toUpperCase()}
                             </span>
                           </td>
-                          <td className="py-4 px-4 text-center space-x-2">
-                            <button onClick={() => triggerEditPassword(u)} className="bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-teal-200">
-                              Edit Sandi
+                          <td className="py-4 px-4 text-center space-x-1 sm:space-x-2">
+                            <button onClick={() => triggerEditPassword(u)} className="bg-slate-50 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-slate-200 mt-1">
+                              Sandi
                             </button>
-                            <button onClick={() => handleResetPassword(u.id, u.nama)} className="bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-bold py-2 px-4 rounded-lg transition border border-orange-200">
-                              Reset Sandi
+                            <button onClick={() => handleResetPassword(u.id, u.nama)} className="bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-orange-200 mt-1">
+                              Reset
+                            </button>
+                            {/* TOMBOL EDIT PROFIL BARU */}
+                            <button onClick={() => handleEditClick(u)} className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2 px-3 rounded-lg transition border border-blue-200 mt-1">
+                              Edit
                             </button>
                           </td>
                         </tr>

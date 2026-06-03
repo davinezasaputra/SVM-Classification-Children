@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash
 from app.models import db, User, LogAktivitas
 from functools import wraps
 
+
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
 def admin_required(f):
@@ -103,3 +104,32 @@ def edit_password(id_user):
     db.session.commit()
     
     return jsonify({'status': 'success', 'message': f'Password {target_user.nama} berhasil diperbarui.'}), 200
+
+@admin.route('/users/<int:id_user>', methods=['PUT'])
+@login_required
+@admin_required
+def edit_akun(id_user):
+    target_user = User.query.get_or_404(id_user)
+    data = request.get_json()
+    if id_user == current_user.id and data.get('role') != 'admin':
+        return jsonify({'status': 'error', 'message': 'Anda tidak dapat menurunkan hak akses Anda sendiri!'}), 400
+    if 'username' in data and data['username'] != target_user.username:
+        existing_user = User.query.filter_by(username=data['username']).first()
+        if existing_user:
+            return jsonify({'status': 'error', 'message': 'Username tersebut sudah digunakan oleh akun lain!'}), 400
+    if 'nama' in data:
+        target_user.nama = data['nama']
+    if 'username' in data:
+        target_user.username = data['username']
+    if 'role' in data:
+        target_user.role = data['role']
+        
+    if 'password' in data and data['password'].strip() != '':
+        target_user.password = generate_password_hash(data['password'])
+    catat_log(f"Mengedit data profil/akun petugas: {target_user.username} ({target_user.nama})")
+    db.session.commit()
+    
+    return jsonify({
+        'status': 'success', 
+        'message': f'Data akun {target_user.nama} berhasil diperbarui.'
+    }), 200

@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State baru untuk mata
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  
   useEffect(() => {
     const logoutReason = localStorage.getItem('logout_reason');
     if (logoutReason) {
@@ -64,11 +64,13 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-gray-900">Sistem Klasifikasi Gizi</h2>
           <p className="text-sm text-gray-500 mt-1">Puskesmas Simpang Teritip</p>
         </div>
+        
         {errorMsg && (
           <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium text-center">
             {errorMsg}
           </div>
         )}
+        
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1.5">Username Petugas</label>
@@ -85,15 +87,27 @@ export default function Login() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">Kata Sandi</label>
-            <input 
-              type="password" 
-              id="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required 
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none transition-all" 
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              {/* Type input bergantung pada state showPassword */}
+              <input 
+                type={showPassword ? "text" : "password"} 
+                id="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none transition-all pr-12" 
+                placeholder="••••••••"
+              />
+              {/* Tombol Mata */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-600 focus:outline-none transition-colors"
+                title={showPassword ? "Sembunyikan Sandi" : "Tampilkan Sandi"}
+              >
+                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-lg`}></i>
+              </button>
+            </div>
           </div>
 
           <button 
@@ -108,7 +122,7 @@ export default function Login() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-400">&copy; 2026 Puskesmas Simpang Teritip</p>
+          <p className="text-xs text-gray-400">&copy; {new Date().getFullYear()} Puskesmas Simpang Teritip</p>
         </div>
       </div>
     </div>
