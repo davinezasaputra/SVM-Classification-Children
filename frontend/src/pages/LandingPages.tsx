@@ -1,9 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+// 1. IMPORT GAMBAR LOKAL
+import fotoUtama from '../assets/hero.avif';
+import kegiatan1 from '../assets/kegiatan/kegiatan1.jpeg';
+import kegiatan2 from '../assets/kegiatan/kegiatan2.jpeg';
+import kegiatan3 from '../assets/kegiatan/kegiatan3.jpeg';
+import fotoVisiMisi from '../assets/1708522016_26ae98947dc7af04d301.png';
+
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 2. STATE UNTUK SLIDER GALERI
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const fotoKegiatan = [kegiatan1, kegiatan2, kegiatan3];
+
+  const prevSlide = () => {
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? fotoKegiatan.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const nextSlide = () => {
+    const isLastSlide = currentIndex === fotoKegiatan.length - 1;
+    const newIndex = isLastSlide ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -21,6 +44,7 @@ export default function LandingPage() {
     { huruf: 'I', judul: 'Informatif', desc: 'Memberikan informasi yang akurat dan jelas untuk setiap layanan yang diberikan.' },
     { huruf: 'P', judul: 'Patient Safety Goal', desc: 'Menciptakan suasana dan lingkungan kerja yang aman dan nyaman dengan mengutamakan keselamatan Pelanggan.' },
   ];
+  
   const staffData = [
     { name: 'dr. Sahat L. Tobing', title: 'Dokter Umum (Medis)', icon: 'fa-user-doctor' },
     { name: 'Rindi Antika, S. Gz', title: 'Nutrisionis (Ahli Gizi)', icon: 'fa-wheat-awn' },
@@ -60,6 +84,7 @@ export default function LandingPage() {
           <div className="hidden lg:flex items-center gap-7">
             <a href="#home" className="text-gray-600 text-sm font-bold hover:text-[#1e3c72] transition">Home</a>
             <a href="#tentang" className="text-gray-600 text-sm font-bold hover:text-[#1e3c72] transition">Tentang</a>
+            <a href="#galeri" className="text-gray-600 text-sm font-bold hover:text-[#1e3c72] transition">Galeri</a>
             <a href="#visi-misi" className="text-gray-600 text-sm font-bold hover:text-[#1e3c72] transition">Visi Misi</a>
             <a href="#tata-nilai" className="text-gray-600 text-sm font-bold hover:text-[#1e3c72] transition">Tata Nilai</a>
             <a href="#sdm" className="text-gray-600 text-sm font-bold hover:text-[#1e3c72] transition">Tim Kami</a>
@@ -80,6 +105,7 @@ export default function LandingPage() {
         <div className={`${isMobileMenuOpen ? 'flex' : 'hidden'} lg:hidden mt-4 pb-4 flex-col gap-4 text-center border-t pt-4`}>
           <a href="#home" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-bold hover:text-[#1e3c72] block">Home</a>
           <a href="#tentang" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-bold hover:text-[#1e3c72] block">Tentang</a>
+          <a href="#galeri" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-bold hover:text-[#1e3c72] block">Galeri</a>
           <a href="#visi-misi" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-bold hover:text-[#1e3c72] block">Visi Misi</a>
           <a href="#tata-nilai" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-bold hover:text-[#1e3c72] block">Tata Nilai</a>
           <a href="#sdm" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 font-bold hover:text-[#1e3c72] block">Tim Kami</a>
@@ -117,13 +143,67 @@ export default function LandingPage() {
               </a>
             </div>
           </div>
+          
+          {/* MENGUBAH ILUSTRASI MENJADI FOTO UTAMA LOKAL */}
           <div className="hidden lg:block lg:w-5/12">
             <img 
-              src="https://img.freepik.com/free-vector/doctor-character-background_1270-84.jpg" 
-              alt="Ilustrasi Medis" 
-              className="w-full max-w-md mx-auto rounded-3xl shadow-2xl animate-bounce" 
-              style={{ animationDuration: '4s' }} 
+              src={fotoUtama} 
+              alt="Puskesmas Simpang Teritip" 
+              className="w-full max-w-md mx-auto rounded-[2.5rem] shadow-2xl border-4 border-white/20 transform hover:scale-105 transition-transform duration-500 object-cover" 
             />
+          </div>
+        </div>
+      </section>
+
+      {/* GALERI KEGIATAN SECTION (BARU DITAMBAHKAN) */}
+      <section id="galeri" className="py-24 bg-gray-50 border-b border-gray-100 relative">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-emerald-500 font-extrabold tracking-widest uppercase text-xs mb-2 block">Dokumentasi</span>
+            <h2 className="text-3xl md:text-4xl font-black text-[#1e3c72] mb-4">Galeri Kegiatan</h2>
+            <div className="w-20 h-1.5 bg-emerald-500 mx-auto rounded-full mb-6"></div>
+            <p className="text-lg text-gray-600 font-medium">Potret aktivitas dan pelayanan kesehatan masyarakat di wilayah kami.</p>
+          </div>
+
+          {/* Kontainer Slider */}
+          <div className="relative group max-w-5xl mx-auto w-full h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
+            
+            {/* Gambar Slider */}
+            <div
+              style={{ backgroundImage: `url(${fotoKegiatan[currentIndex]})` }}
+              className="w-full h-full bg-center bg-cover duration-500 transition-all ease-in-out"
+            ></div>
+
+            {/* Overlay Gradient bawah agar titik (dots) lebih terbaca */}
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+
+            {/* Tombol Kiri */}
+            <div className="hidden group-hover:block absolute top-1/2 -translate-y-1/2 left-6 text-2xl rounded-full p-3 bg-white/80 text-[#1e3c72] cursor-pointer hover:bg-white hover:scale-110 shadow-lg transition-all z-10">
+              <button onClick={prevSlide} aria-label="Previous" className="flex items-center justify-center w-6 h-6">
+                <i className="fa-solid fa-chevron-left"></i>
+              </button>
+            </div>
+
+            {/* Tombol Kanan */}
+            <div className="hidden group-hover:block absolute top-1/2 -translate-y-1/2 right-6 text-2xl rounded-full p-3 bg-white/80 text-[#1e3c72] cursor-pointer hover:bg-white hover:scale-110 shadow-lg transition-all z-10">
+              <button onClick={nextSlide} aria-label="Next" className="flex items-center justify-center w-6 h-6">
+                <i className="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+
+            {/* Indikator Titik (Dots) Menggunakan gaya UI modern */}
+            <div className="absolute bottom-6 w-full flex justify-center gap-3 z-10">
+              {fotoKegiatan.map((_, slideIndex) => (
+                <button
+                  key={slideIndex}
+                  onClick={() => setCurrentIndex(slideIndex)}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    currentIndex === slideIndex ? 'bg-emerald-500 w-8 shadow-md' : 'bg-white/70 hover:bg-white w-2.5'
+                  }`}
+                  aria-label={`Pergi ke slide ${slideIndex + 1}`}
+                ></button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -167,72 +247,82 @@ export default function LandingPage() {
       {/* VISI MISI SECTION */}
       <section id="visi-misi" className="py-24 bg-gray-50 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row items-start gap-16">
-            <div className="lg:w-5/12 sticky top-32">
-              <div className="relative">
-                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80" alt="Pelayanan Kesehatan" className="rounded-3xl shadow-2xl relative z-10 w-full object-cover h-[500px]" />
-                <div className="absolute -bottom-6 -right-6 w-full h-full border-4 border-[#1e3c72] rounded-3xl z-0 hidden md:block opacity-20"></div>
-                
-                {/* Float Badge */}
-                <div className="absolute -left-6 top-10 bg-white p-4 rounded-2xl shadow-xl z-20 flex items-center gap-4 animate-bounce" style={{ animationDuration: '3s' }}>
-                  <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl"><i className="fa-solid fa-heart-pulse"></i></div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Motto Kami</p>
-                    <p className="font-bold text-[#1e3c72]">Melayani Sepenuh Hati</p>
-                  </div>
-                </div>
+          
+          {/* 1. BAGIAN GAMBAR SPANDUK (FULL WIDTH) */}
+          <div className="relative w-full mb-24 mt-4">
+            <img 
+              src={fotoVisiMisi} 
+              alt="Banner Visi Misi Puskesmas" 
+              className="w-full rounded-3xl shadow-xl object-contain bg-[#0a3a79]" 
+            />
+            
+            {/* Float Badge (Motto) - Dipindah ke pojok kiri bawah Spanduk */}
+            <div className="absolute -bottom-8 left-6 md:left-12 bg-white p-4 rounded-2xl shadow-xl z-20 flex items-center gap-4 animate-bounce" style={{ animationDuration: '3s' }}>
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl"><i className="fa-solid fa-heart-pulse"></i></div>
+              <div>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Motto Kami</p>
+                <p className="font-bold text-[#1e3c72]">Melayani Sepenuh Hati</p>
               </div>
             </div>
-            
-            <div className="lg:w-7/12">
+          </div>
+
+          {/* 2. BAGIAN TEKS VISI, TUJUAN & MISI (DI BAWAH SPANDUK) */}
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
               <span className="text-emerald-500 font-extrabold tracking-widest uppercase text-xs mb-2 block">Komitmen Pelayanan</span>
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-10">Visi, Misi & Tujuan <br/><span className="text-[#1e3c72]">Puskesmas Simpang Teritip</span></h2>
-              
-              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-8 hover:shadow-lg transition-shadow">
-                <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-3xl md:text-4xl font-black text-gray-900">Visi, Misi & Tujuan <br/><span className="text-[#1e3c72]">Puskesmas Simpang Teritip</span></h2>
+            </div>
+            
+            {/* Grid untuk Visi & Tujuan bersebelahan */}
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              {/* Visi */}
+              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i className="fa-solid fa-eye"></i></div>
                   <h5 className="text-2xl font-bold text-[#1e3c72]">Visi Utama</h5>
                 </div>
                 <p className="text-gray-600 text-lg font-medium leading-relaxed">"Mewujudkan Masyarakat Yang Sehat dan Mandiri di Wilayah Kerja Puskesmas Simpang Teritip."</p>
               </div>
 
-              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl"><i className="fa-solid fa-list-check"></i></div>
-                  <h5 className="text-2xl font-bold text-[#1e3c72]">Misi Pelayanan</h5>
-                </div>
-                
-                <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-[#1e3c72] before:via-emerald-300 before:to-transparent ml-2">
-                  {[
-                    "Meningkatkan dan mengembangkan mutu sumber daya kesehatan dan pemberdayaan kesehatan masyarakat.",
-                    "Meningkatkan capaian kinerja unit pelayanan / program.",
-                    "Meningkatkan koordinasi dan kerjasama lintas program dan lintas sektor.",
-                    "Meningkatkan kualitas pelayanan kesehatan yang cepat, tepat, bermutu, dan terjangkau.",
-                    "Meningkatkan pengetahuan dan peran serta masyarakat agar dapat berperilaku hidup bersih dan sehat."
-                  ].map((misi, idx) => (
-                    <div key={idx} className="relative pl-8 group">
-                      <div className="absolute left-0 top-1 w-6 h-6 bg-white border-4 border-[#1e3c72] rounded-full group-hover:bg-emerald-400 group-hover:border-emerald-400 transition-colors z-10 shadow-sm"></div>
-                      <p className="font-bold text-gray-700 leading-relaxed text-sm group-hover:text-gray-900 transition-colors">{misi}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+              {/* Tujuan */}
               <div className="bg-[#1e3c72] text-white p-8 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><i className="fa-solid fa-bullseye"></i></div>
-                  <h5 className="text-xl font-bold">Tujuan</h5>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl"><i className="fa-solid fa-bullseye"></i></div>
+                  <h5 className="text-2xl font-bold">Tujuan</h5>
                 </div>
-                <p className="text-blue-100 font-medium">"Menjadikan masyarakat yang sehat dan mandiri di wilayah kerja Puskesmas Simpang Teritip."</p>
+                <p className="text-blue-100 text-lg font-medium leading-relaxed">"Menjadikan masyarakat yang sehat dan mandiri di wilayah kerja Puskesmas Simpang Teritip."</p>
               </div>
             </div>
+
+            {/* Misi (Memanjang di bawah) */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl"><i className="fa-solid fa-list-check"></i></div>
+                <h5 className="text-2xl font-bold text-[#1e3c72]">Misi Pelayanan</h5>
+              </div>
+              
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-[#1e3c72] before:via-emerald-300 before:to-transparent ml-2">
+                {[
+                  "Meningkatkan dan mengembangkan mutu sumber daya kesehatan dan pemberdayaan kesehatan masyarakat.",
+                  "Meningkatkan capaian kinerja unit pelayanan / program.",
+                  "Meningkatkan koordinasi dan kerjasama lintas program dan lintas sektor.",
+                  "Meningkatkan kualitas pelayanan kesehatan yang cepat, tepat, bermutu, dan terjangkau.",
+                  "Meningkatkan pengetahuan dan peran serta masyarakat agar dapat berperilaku hidup bersih dan sehat."
+                ].map((misi, idx) => (
+                  <div key={idx} className="relative pl-8 group">
+                    <div className="absolute left-0 top-1 w-6 h-6 bg-white border-4 border-[#1e3c72] rounded-full group-hover:bg-emerald-400 group-hover:border-emerald-400 transition-colors z-10 shadow-sm"></div>
+                    <p className="font-bold text-gray-700 leading-relaxed text-sm md:text-base group-hover:text-gray-900 transition-colors">{misi}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
       {/* TATA NILAI TERITIP SECTION */}
       <section id="tata-nilai" className="py-24 bg-white relative overflow-hidden border-b border-gray-100">
-        {/* Dekorasi Background */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-50 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
         
@@ -321,9 +411,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SDM / STAF SECTION (BARU - BERDASARKAN GAMBAR) */}
+      {/* SDM / STAF SECTION */}
       <section id="sdm" className="py-24 bg-gray-50 border-t border-gray-100 text-center relative overflow-hidden">
-        {/* Dekorasi Background */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-50 rounded-full blur-3xl opacity-30 translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-50 rounded-full blur-3xl opacity-30 translate-y-1/2 -translate-x-1/2"></div>
 
@@ -373,7 +462,6 @@ export default function LandingPage() {
 
       {/* FOOTER */}
       <footer className="bg-[#1e3c72] text-white pt-16 pb-8 border-t-[10px] border-emerald-500 relative overflow-hidden">
-        {/* Dekorasi Footer */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
 
