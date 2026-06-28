@@ -42,14 +42,14 @@ def api_predict():
         df_bbtb = pd.DataFrame({'bb': [bb], 'tb_koreksi': [tb_terkalibrasi], 'jk': [jk_encoded]})
 
         pred_bbu_idx = pipeline_bbu.predict(df_bbu)[0]
-        status_bbu_SVM = label_bbu.inverse_transform([pred_bbu_idx])[0]
+        status_bbu_SVM = label_bbu[pred_bbu_idx]
 
         pred_tbu_idx = pipeline_tbu.predict(df_tbu)[0]
-        status_tbu_SVM = label_tbu.inverse_transform([pred_tbu_idx])[0]
+        status_tbu_SVM = label_tbu[pred_tbu_idx]
 
         pred_bbtb_idx = pipeline_bbtb.predict(df_bbtb)[0]
-        status_bbtb_SVM = label_bbtb.inverse_transform([pred_bbtb_idx])[0]
-        
+        status_bbtb_SVM = label_bbtb[pred_bbtb_idx]
+
         prob_bbtb = max(pipeline_bbtb.predict_proba(df_bbtb)[0]) * 100
         if prob_bbtb < 40:
             status_bbtb_SVM = "model svm kurang akurat untuk data ini, tolong periksa kembali secara manual"
