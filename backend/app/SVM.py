@@ -13,15 +13,15 @@ try:
     
     paket_bbu = joblib.load(os.path.join(base_direct, 'mesin_svm_bbu.pkl'))
     pipeline_bbu = paket_bbu['model_pipeline']
-    label_bbu = paket_bbu['label_encoder']
+    label_bbu = paket_bbu['labels_asli']
     
     paket_tbu = joblib.load(os.path.join(base_direct, 'mesin_svm_tbu.pkl'))
     pipeline_tbu = paket_tbu['model_pipeline'] 
-    label_tbu = paket_tbu['label_encoder']
+    label_tbu = paket_tbu['labels_asli']
     
     paket_bbtb = joblib.load(os.path.join(base_direct, 'mesin_svm_bbtb.pkl'))
     pipeline_bbtb = paket_bbtb['model_pipeline'] 
-    label_bbtb = paket_bbtb['label_encoder']
+    label_bbtb = paket_bbtb['labels_asli']
     
     print ("Semua Model SVM Berhasil dimuat")
 except Exception as e:
